@@ -2,7 +2,7 @@
 // Database connection details
 $servername = "mysql311.phy.lolipop.lan";
 $username = "LAA1517492";
-$password = "your_password"; // Replace with your actual password
+$password = "Pass0313"; // Replace with your actual password
 $dbname = "LAA1517492-giants";
 
 // Create connection
@@ -13,11 +13,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch character entries from the database
-$sql = "SELECT entry_id, character_id, harvest_count, character_image FROM characters";
+// Fetch character entries from the zukan and characters tables
+$sql = "SELECT zukan.entry_id, zukan.character_id, zukan.harvest_count, zukan.character_image, characters.name 
+        FROM zukan 
+        JOIN characters ON zukan.character_id = characters.character_id";
 $result = $conn->query($sql);
 
-// Rest of your HTML code...
 ?>
 
 <!DOCTYPE html>
@@ -56,8 +57,9 @@ $result = $conn->query($sql);
         .card img {
             width: 100%;
             height: 200px;
-            object-fit: cover;
+            object-fit: contain;  /* 見切れないように contain に変更 */
             border-radius: 10px;
+            background-color: #f4f4f4;  /* 背景色を追加して余白部分を目立たせない */
         }
         .card h3 {
             font-size: 18px;
@@ -95,7 +97,7 @@ $result = $conn->query($sql);
             while($row = $result->fetch_assoc()) {
                 echo '<div class="card">';
                 echo '<img src="' . $row['character_image'] . '" alt="' . $row['character_id'] . '">';
-                echo '<h3>' . $row['character_id'] . '</h3>';
+                echo '<h3>' . $row['name'] . '</h3>';  // characters テーブルの name カラムを表示
                 echo '<p>収穫した数: ' . $row['harvest_count'] . '人</p>';
                 echo '</div>';
             }
