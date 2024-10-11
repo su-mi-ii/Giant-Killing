@@ -28,7 +28,11 @@ $result = $conn->query($sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>図鑑</title>
 <style>
+<<<<<<< HEAD
        body {
+=======
+    body {
+>>>>>>> main
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     text-align: center;
