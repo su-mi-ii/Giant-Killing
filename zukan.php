@@ -27,59 +27,78 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>図鑑</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-        }
-        .container {
-            margin: 0 auto;
-            padding: 20px;
-            width: 90%;
-            max-width: 1200px;
-            background-color: #a37934;
-            border-radius: 10px;
-        }
-        .grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .card {
-            background-color: white;
-            margin: 15px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 250px;
-        }
-        .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: contain;  /* 見切れないように contain に変更 */
-            border-radius: 10px;
-            background-color: #f4f4f4;  /* 背景色を追加して余白部分を目立たせない */
-        }
-        .card h3 {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        .card p {
-            font-size: 14px;
-            color: #666;
-        }
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 30px;
-            background-color: white;
-            border-radius: 50%;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-        }
+<style>
+       body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+.container {
+    margin: 0 auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 1200px;
+    background-color: #a37934;
+    border-radius: 10px;
+}
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    background-color: white;
+    margin: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;  /* アニメーション追加 */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);  /* 立体的な影を追加 */
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);  /* グラデーションを適用 */
+}
+
+.card:hover {
+    transform: translateY(-10px);  /* ホバー時に浮き上がる効果 */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);  /* ホバー時の影を強調 */
+}
+
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 10px;
+    background-color: #f4f4f4;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);  /* 画像に内側の影を追加 */
+}
+
+.card h3 {
+    font-size: 18px;
+    margin: 10px 0;
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);  /* タイトルに軽い影を追加 */
+}
+
+.card p {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 30px;
+    background-color: white;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
     </style>
 </head>
 <body>
