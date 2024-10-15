@@ -1,11 +1,8 @@
 <?php
-// データベース接続情報を定義します
 require 'db-connect.php';
 
-// SQLクエリを定義します
 $sql = "SELECT world_id, world_type FROM world";
 
-// クエリを準備して実行します
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -85,13 +82,10 @@ $worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
-    <!-- Back Button -->
     <button class="back-button">戻る</button>
 
-    <!-- Title -->
     <h1>ワールド選択</h1>
 
-    <!-- World Options -->
     <div class="container">
         <?php foreach ($worlds as $world): ?>
             <div class="world-option">
@@ -101,7 +95,6 @@ $worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endforeach; ?>
     </div>
 
-    <!-- Navigation Buttons -->
     <div class="navigation-buttons">
         <button class="nav-button">
             <img src="left_arrow.png" alt="Left">

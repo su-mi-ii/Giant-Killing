@@ -1,10 +1,9 @@
 <?php
 require 'db-connect.php';
-
-$sql = "SELECT tool_name, price,effect,tool_image FROM tools";
+$sql = "SELECT item_name, price, effect,item_image FROM items";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
-$tools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -79,10 +78,10 @@ $tools = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </button>
 
     <div class="container">
-        <?php foreach ($tools as $tool): ?>
+        <?php foreach ($items as $item): ?>
             <div class="upgrade-item">
-                <img src="<?= htmlspecialchars($tool['tool_image']) ?>" alt="<?= htmlspecialchars($tool['tool_name']) ?> Icon">
-                <button class="upgrade-button"><?= htmlspecialchars($tool['price']) ?>cでレベルアップ</button>
+                <img src="<?= strtolower($item['item_name']) ?>_icon.png" alt="<?= htmlspecialchars($item['item_name']) ?> Icon">
+                <button class="upgrade-button"><?= htmlspecialchars($item['price']) ?>cでレベルアップ</button>
             </div>
         <?php endforeach; ?>
     </div>
