@@ -1,3 +1,12 @@
+<?php
+require 'db-connect.php';
+
+$sql = "SELECT tool_name, price,effect,tool_image FROM tools";
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$tools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -65,29 +74,17 @@
 </head>
 <body>
 
-    <!-- Exit button -->
     <button class="exit-button">
         <img src="exit_icon.png" alt="Exit">
     </button>
 
     <div class="container">
-        <!-- First item -->
-        <div class="upgrade-item">
-            <img src="light_icon.png" alt="Light Icon">
-            <button class="upgrade-button">1000cでレベルアップ</button>
-        </div>
-
-        <!-- Second item -->
-        <div class="upgrade-item">
-            <img src="humidifier_icon.png" alt="Humidifier Icon">
-            <button class="upgrade-button">1000cでレベルアップ</button>
-        </div>
-
-        <!-- Third item -->
-        <div class="upgrade-item">
-            <img src="heater_icon.png" alt="Heater Icon">
-            <button class="upgrade-button">1000cでレベルアップ</button>
-        </div>
+        <?php foreach ($tools as $tool): ?>
+            <div class="upgrade-item">
+                <img src="<?= htmlspecialchars($tool['tool_image']) ?>" alt="<?= htmlspecialchars($tool['tool_name']) ?> Icon">
+                <button class="upgrade-button"><?= htmlspecialchars($tool['price']) ?>cでレベルアップ</button>
+            </div>
+        <?php endforeach; ?>
     </div>
 
 </body>

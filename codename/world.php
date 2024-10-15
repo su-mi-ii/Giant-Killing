@@ -1,3 +1,14 @@
+<?php
+require 'db-connect.php';
+
+$sql = "SELECT world_id, world_type FROM world";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -71,34 +82,19 @@
 </head>
 <body>
 
-    <!-- Back Button -->
     <button class="back-button">戻る</button>
 
-    <!-- Title -->
     <h1>ワールド選択</h1>
 
-    <!-- World Options -->
     <div class="container">
-        <!-- World 1 -->
-        <div class="world-option">
-            <span>ハリポタワールド</span>
-            <img src="harry_world.png" alt="ハリポタワールド">
-        </div>
-
-        <!-- World 2 -->
-        <div class="world-option">
-            <span>ファンタスティックワールド</span>
-            <img src="fantastic_world.png" alt="ファンタスティックワールド">
-        </div>
-
-        <!-- World 3 -->
-        <div class="world-option">
-            <span>ミヤモトワールド</span>
-            <img src="miyamoto_world.png" alt="ミヤモトワールド">
-        </div>
+        <?php foreach ($worlds as $world): ?>
+            <div class="world-option">
+                <span><?= htmlspecialchars($world['world_name']) ?></span>
+                <img src="<?= htmlspecialchars($world['world_image']) ?>" alt="<?= htmlspecialchars($world['world_name']) ?>">
+            </div>
+        <?php endforeach; ?>
     </div>
 
-    <!-- Navigation Buttons -->
     <div class="navigation-buttons">
         <button class="nav-button">
             <img src="left_arrow.png" alt="Left">
