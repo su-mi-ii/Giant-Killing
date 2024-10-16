@@ -1,20 +1,31 @@
 <?php
-// DB接続ファイルをインクルード
-include 'db-connect.php';
+// データベース接続情報
+$servername = "mysql311.phy.lolipop.lan";
+$username = "LAA1517492";
+$password = "Pass0313"; // 実際のパスワードに置き換えてください
+$dbname = "LAA1517492-giants";
 
-// データベースからプロフィール情報を取得するクエリを実行
+// データベース接続の作成
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// 接続エラーチェック
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
 try {
     // 任意のユーザーIDを設定（例: 1）
     $user_id = 1;
 
     // プロフィール情報を取得するSQLクエリ
-    $sql = 'SELECT username, profile_image_url, discovered_humans, total_harvested FROM users WHERE id = :user_id';
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $sql = 'SELECT user_name, profile_image_url, discovered_humans, total_harvested FROM users WHERE id = ?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $user_id);
     $stmt->execute();
+    $result = $stmt->get_result();
 
     // 結果を取得
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $result->fetch_assoc();
 
     if ($user) {
         // 取得したデータを変数に格納
@@ -29,10 +40,13 @@ try {
         $discovered_humans = 0;
         $total_harvested = 0;
     }
-} catch (PDOException $e) {
+} catch (Exception $e) {
     echo 'データベースエラー: ' . htmlspecialchars($e->getMessage());
     exit;
 }
+
+// データベース接続を閉じる
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -42,7 +56,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ningen License Card</title>
     <style>
-        /* 前回のスタイル */
+        /* ライセンスカードのスタイル */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -109,27 +123,26 @@ try {
             width: 40px;
             height: auto;
         }
-
     </style>
 </head>
 <body>
 
-    <!-- Back Button -->
+    <!-- 戻るボタン -->
     <button class="back-button">
         <img src="back_arrow.png" alt="Back">
     </button>
 
-    <!-- License Card Container -->
+    <!-- ライセンスカードのコンテナ -->
     <div class="container">
         <h1>Ningen License Card</h1>
 
         <div class="license-card">
-            <!-- Profile Picture -->
+            <!-- プロフィール画像 -->
             <div class="profile-picture">
                 <img src="<?php echo htmlspecialchars($profile_image_url); ?>" alt="Profile Picture" style="width: 100%; height: auto; border-radius: 50%;">
             </div>
 
-            <!-- Profile Info -->
+            <!-- プロフィール情報 -->
             <div class="profile-info">
                 <h2><?php echo htmlspecialchars($nickname); ?></h2>
                 <p>発見した人間: <?php echo htmlspecialchars($discovered_humans); ?>人</p>
