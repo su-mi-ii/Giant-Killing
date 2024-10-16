@@ -18,7 +18,7 @@ try {
     $user_id = 1;
 
     // プロフィール情報を取得するSQLクエリ
-    $sql = 'SELECT username, profile_image_url, discovered_humans, total_harvested FROM users WHERE id = ?';
+    $sql = 'SELECT user_name, profile_image_url, discovered_humans, total_harvested FROM users WHERE id = ?';
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $user_id);
     $stmt->execute();
