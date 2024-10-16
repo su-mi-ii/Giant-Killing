@@ -52,7 +52,7 @@
     <div class="container">
         <h1>ヒューマン・ハーベスト</h1>
 
-        <a href="top.php" class="button">Start</a>
+        <a href="top.php" class="button">ログイン</a>
 
         <a href="toroku.php" class="button">新規登録</a>
     </div>
