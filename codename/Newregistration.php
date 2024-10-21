@@ -3,6 +3,9 @@
 
 require 'db-connect.php';
 
+// セッションを開始
+session_start();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_name = trim($_POST['user_name']);
     $password = trim($_POST['password']);
@@ -23,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 登録したユーザーのIDを取得
             $user_id = $pdo->lastInsertId();
 
-            // クッキーにユーザーIDを保存（例: 30日間有効）
-            setcookie('user_id', $user_id, time() + (30 * 24 * 60 * 60), '/', '', false, true);
+            // セッションにユーザーIDを保存
+            $_SESSION['user_id'] = $user_id;
 
             // 登録完了後 top.php へリダイレクト
             header('Location: top.php');

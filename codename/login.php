@@ -3,9 +3,12 @@
 
 require 'db-connect.php';
 
-// クッキーがセットされているか確認
-if (isset($_COOKIE['user_id'])) {
-    // クッキーが存在すれば top.php へリダイレクト
+// セッションを開始
+session_start();
+
+// セッションがセットされているか確認
+if (isset($_SESSION['user_id'])) {
+    // セッションが存在すれば top.php へリダイレクト
     header('Location: top.php');
     exit;
 }
@@ -27,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
-                // クッキーにユーザーIDを保存（例: 30日間有効）
-                setcookie('user_id', $user['user_id'], time() + (30 * 24 * 60 * 60), '/', '', false, true);
+                // セッションにユーザーIDを保存
+                $_SESSION['user_id'] = $user['user_id'];
 
                 // ログイン成功後 top.php へリダイレクト
                 header('Location: top.php');
