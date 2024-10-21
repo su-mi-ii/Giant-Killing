@@ -74,7 +74,7 @@ $worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .nav-button img {
-            width: 40px;
+            width: 200px;
             height: auto;
         }
 
@@ -97,10 +97,12 @@ $worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="navigation-buttons">
         <button class="nav-button">
-            <img src="left_arrow.png" alt="Left">
+            <img src="image/haripota.png" alt="ハリポタ">
         </button>
+        <br>
+        <br>
         <button class="nav-button">
-            <img src="right_arrow.png" alt="Right">
+            <img src="image/fantastic.png" alt="ファンタスティック">
         </button>
     </div>
 

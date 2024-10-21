@@ -80,8 +80,8 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="container">
         <?php foreach ($items as $item): ?>
             <div class="upgrade-item">
-                <img src="<?= strtolower($item['item_name']) ?>_icon.png" alt="<?= htmlspecialchars($item['item_name']) ?> Icon">
-                <button class="upgrade-button"><?= htmlspecialchars($item['price']) ?>cでレベルアップ</button>
+            <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?> Icon">
+            <button class="upgrade-button"><?= htmlspecialchars($item['price']) ?>cでレベルアップ</button>
             </div>
         <?php endforeach; ?>
     </div>
