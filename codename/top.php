@@ -1,20 +1,4 @@
 <?php
-session_start(); // セッション開始
-require 'db-connect.php';
-
-$user_id = $_SESSION['user_id']; // セッションからユーザーIDを取得
-
-// キャラクター情報を取得するSQL文
-try {
-    $sql = "SELECT name, rarity, character_image, id FROM characters"; // キャラクターのIDも取得
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $characters = $stmt->fetchAll(PDO::FETCH_ASSOC); // キャラクター情報を取得
-} catch (PDOException $e) {
-    echo 'データ取得エラー: ' . htmlspecialchars($e->getMessage());
-    exit;
-}
-
 // なめこの収穫を記録する関数
 function recordHarvest($pdo, $user_id, $character_id) {
     try {
