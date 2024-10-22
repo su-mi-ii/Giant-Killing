@@ -3,9 +3,13 @@
 
 require 'db-connect.php';
 
+// セッションを開始
+session_start();
+
 // クッキーがセットされているか確認
 if (isset($_COOKIE['user_id'])) {
-    // クッキーが存在すれば top.php へリダイレクト
+    // クッキーが存在すれば、セッションにユーザーIDを設定し top.php へリダイレクト
+    $_SESSION['user_id'] = $_COOKIE['user_id'];
     header('Location: top.php');
     exit;
 }
@@ -30,6 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // クッキーにユーザーIDを保存（例: 30日間有効）
                 setcookie('user_id', $user['user_id'], time() + (30 * 24 * 60 * 60), '/', '', false, true);
 
+                // セッションにユーザーIDを保存
+                $_SESSION['user_id'] = $user['user_id'];
+
                 // ログイン成功後 top.php へリダイレクト
                 header('Location: top.php');
                 exit;
@@ -44,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
