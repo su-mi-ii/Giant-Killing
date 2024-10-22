@@ -29,8 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // セッションにユーザーIDを保存
             $_SESSION['user_id'] = $user_id;
 
+            // クッキーにユーザーIDを保存（例: 30日間有効）
+            setcookie('user_id', $user_id, time() + (30 * 24 * 60 * 60), '/', '', false, true);
+
             // 登録完了後 top.php へリダイレクト
-            header('Location: top.php');
+            header('Location: menu.php');
             exit;
         } catch (PDOException $e) {
             // エラーメッセージ
