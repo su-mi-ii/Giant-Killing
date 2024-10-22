@@ -63,10 +63,17 @@ if (isset($_COOKIE['user_id'])) {
 // セッションを開始
 session_start();
 
+<<<<<<< HEAD
 // セッションがセットされているか確認
 if (isset($_SESSION['user_id'])) {
     // セッションが存在すれば top.php へリダイレクト
 >>>>>>> 03b6c25f338320bb0520bbeedadb02da2a087e99
+=======
+// クッキーがセットされているか確認
+if (isset($_COOKIE['user_id'])) {
+    // クッキーが存在すれば、セッションにユーザーIDを設定し top.php へリダイレクト
+    $_SESSION['user_id'] = $_COOKIE['user_id'];
+>>>>>>> 65a010f4c9ce83e23baef01ba912165b811237e5
     header('Location: top.php');
     exit;
 }
@@ -89,9 +96,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user && password_verify($password, $user['password'])) {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 // クッキーにユーザーIDを保存（例: 30日間有効）
                 setcookie('user_id', $user['user_id'], time() + (30 * 24 * 60 * 60), '/', '', false, true);
 =======
+=======
+                // クッキーにユーザーIDを保存（例: 30日間有効）
+                setcookie('user_id', $user['user_id'], time() + (30 * 24 * 60 * 60), '/', '', false, true);
+
+>>>>>>> 65a010f4c9ce83e23baef01ba912165b811237e5
                 // セッションにユーザーIDを保存
                 $_SESSION['user_id'] = $user['user_id'];
 >>>>>>> 03b6c25f338320bb0520bbeedadb02da2a087e99
@@ -110,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
