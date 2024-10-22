@@ -1,17 +1,17 @@
 <<<<<<< HEAD
 =======
 <?php
-require 'db-connect.php';
-
-// キャラクター情報を取得するSQL文
-try {
-    $sql = "SELECT name, rarity, character_image FROM characters";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $characters = $stmt->fetchAll(PDO::FETCH_ASSOC); // キャラクター情報を取得
-} catch (PDOException $e) {
-    echo 'データ取得エラー: ' . htmlspecialchars($e->getMessage());
-    exit;
+// なめこの収穫を記録する関数
+function recordHarvest($pdo, $user_id, $character_id) {
+    try {
+        $sql = "INSERT INTO harvest_log (user_id, character_id) VALUES (:user_id, :character_id)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':character_id', $character_id);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        echo 'ログ記録エラー: ' . htmlspecialchars($e->getMessage());
+    }
 }
 ?>
 >>>>>>> main
@@ -273,9 +273,32 @@ try {
 
         // なめこを収穫する関数
         function harvestNameko(index) {
-            namekos.splice(index, 1);
-            message.textContent = 'なめこを収穫しました！';
-            displayNamekos();
+            const characterId = namekos[index].id; // キャラクターのIDを取得
+            // PHPにリクエストを送信してログを記録する処理を追加
+            fetch('harvest.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: <?php echo $user_id; ?>,
+                    character_id: characterId
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    namekos.splice(index, 1);
+                    message.textContent = 'なめこを収穫しました！';
+                    displayNamekos();
+                } else {
+                    message.textContent = '収穫の記録に失敗しました。';
+                }
+            })
+            .catch(error => {
+                console.error('エラー:', error);
+                message.textContent = '収穫の記録に失敗しました。';
+            });
         }
     </script>
 >>>>>>> main
