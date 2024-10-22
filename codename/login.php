@@ -1,79 +1,15 @@
 <?php
-<<<<<<< HEAD
-// login_process.php
-session_start();
-
-// データベース接続
-require 'db-connect.php'; // パスは `db-connect.php` の位置に応じて調整してください
-
-// フォームデータの取得とバリデーション
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-
-    // 簡単なバリデーション
-    if (empty($username) || empty($password)) {
-        $_SESSION['error'] = 'ユーザー名とパスワードは必須です。';
-        header('Location: login.php');
-        exit;
-    }
-
-    try {
-        // ユーザー情報の取得
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE username = ?');
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password'])) {
-            // 認証成功
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            header('Location: login_success.php');
-            exit;
-        } else {
-            // 認証失敗
-            $_SESSION['error'] = 'ユーザー名またはパスワードが正しくありません。';
-            header('Location: login.php');
-            exit;
-        }
-
-    } catch (PDOException $e) {
-        // 本番環境では詳細なエラーメッセージを表示しないでください
-        $_SESSION['error'] = 'ログイン中にエラーが発生しました。';
-        header('Location: login.php');
-        exit;
-    }
-} else {
-    // 不正なアクセス
-    header('Location: login.php');
-    exit;
-}
-?>
-
-=======
 // login.php
 
 require 'db-connect.php';
 
-<<<<<<< HEAD
-// クッキーがセットされているか確認
-if (isset($_COOKIE['user_id'])) {
-    // クッキーが存在すれば top.php へリダイレクト
-=======
 // セッションを開始
 session_start();
 
-<<<<<<< HEAD
-// セッションがセットされているか確認
-if (isset($_SESSION['user_id'])) {
-    // セッションが存在すれば top.php へリダイレクト
->>>>>>> 03b6c25f338320bb0520bbeedadb02da2a087e99
-=======
 // クッキーがセットされているか確認
 if (isset($_COOKIE['user_id'])) {
     // クッキーが存在すれば、セッションにユーザーIDを設定し top.php へリダイレクト
     $_SESSION['user_id'] = $_COOKIE['user_id'];
->>>>>>> 65a010f4c9ce83e23baef01ba912165b811237e5
     header('Location: top.php');
     exit;
 }
@@ -95,19 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-                // クッキーにユーザーIDを保存（例: 30日間有効）
-                setcookie('user_id', $user['user_id'], time() + (30 * 24 * 60 * 60), '/', '', false, true);
-=======
-=======
                 // クッキーにユーザーIDを保存（例: 30日間有効）
                 setcookie('user_id', $user['user_id'], time() + (30 * 24 * 60 * 60), '/', '', false, true);
 
->>>>>>> 65a010f4c9ce83e23baef01ba912165b811237e5
                 // セッションにユーザーIDを保存
                 $_SESSION['user_id'] = $user['user_id'];
->>>>>>> 03b6c25f338320bb0520bbeedadb02da2a087e99
 
                 // ログイン成功後 top.php へリダイレクト
                 header('Location: top.php');
@@ -147,4 +75,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 </body>
 </html>
->>>>>>> main
