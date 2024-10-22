@@ -39,6 +39,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            text-decoration: none;
         }
 
         .button:hover {
@@ -50,8 +51,10 @@
 
     <div class="container">
         <h1>ヒューマン・ハーベスト</h1>
-        <button class="button">Start</button>
-        <button class="button">新規登録</button>
+
+        <a href="top.php" class="button">Start</a>
+
+        <a href="toroku.php" class="button">新規登録</a>
     </div>
 
 </body>
