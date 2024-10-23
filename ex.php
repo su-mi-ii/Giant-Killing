@@ -67,31 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: relative;
             margin: 0 auto;
         }
-
-        .pointbox{
-        padding: 0.5em 1em;
-        background: -moz-linear-gradient(#ffb03c, #ff708d);
-        background: -webkit-linear-gradient(#ffb03c, #ff708d);
-        background: linear-gradient(to right, #ffb03c, #ff708d);
-        color: #FFF;
-        }
-        .pointbox p {
-            margin: 0; 
-            padding: 0;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="pointbox">
-        <p>👛　　0 point</p>
-        </div>
-            <img src="image/koukoku.webp" alt="表示できない場合のテキスト" width="100" height="100">
-            <img src="image/zukan.webp" alt="表示できない場合のテキスト" width="100" height="100">
-            <img src="image/setei.webp" alt="表示できない場合のテキスト" width="100" height="100">
-        
+        <h1>📷</h1>
         <div id="nameko-container">
-        <div class="log"></div>
+            <div class="log"></div>
         </div>
         <div id="message"></div>
     </div>
