@@ -80,6 +80,15 @@ $result = $conn->query($sql);
             color: #333;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
+<<<<<<< HEAD
+=======
+
+        .card p {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+>>>>>>> main
 
         .back-button {
             position: absolute;
@@ -111,6 +120,10 @@ $result = $conn->query($sql);
                 echo '<div class="card">';
                 echo '<img src="' . $row['character_image'] . '" alt="' . $row['character_id'] . '">';
                 echo '<h3>' . $row['name'] . '</h3>';
+<<<<<<< HEAD
+=======
+                echo '<p>収穫した数: ' . $row['harvest_count'] . '人</p>';
+>>>>>>> main
                 echo '</div>';
                 echo '</a>';
             }

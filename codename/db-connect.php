@@ -1,5 +1,5 @@
 <?php
-// データベース接続情報を定義します
+// データベース接続情報を定義します^^
 const SERVER = 'mysql311.phy.lolipop.lan';
 const DBNAME = 'LAA1517492-giants';
 const USER = 'LAA1517492';
@@ -19,3 +19,7 @@ try {
     exit;
 }
 ?>
+<<<<<<< HEAD
+<!-- 1 -->
+=======
+>>>>>>> main
