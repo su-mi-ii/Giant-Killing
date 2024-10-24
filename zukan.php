@@ -1,20 +1,21 @@
-<?php
-// Database connection details
+<?php 
+session_start();
+// データベース接続情報
 $servername = "mysql311.phy.lolipop.lan";
 $username = "LAA1517492";
-$password = "Pass0313"; // Replace with your actual password
+$password = "Pass0313"; // 実際のパスワードに置き換えてください
 $dbname = "LAA1517492-giants";
 
-// Create connection
+// 接続を作成
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
+// 接続を確認
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch character entries from the zukan and characters tables
-$sql = "SELECT zukan.entry_id, zukan.character_id, zukan.harvest_count, zukan.character_image, characters.name 
+// zukanとcharactersテーブルからキャラクター情報を取得
+$sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name 
         FROM zukan 
         JOIN characters ON zukan.character_id = characters.character_id";
 $result = $conn->query($sql);
@@ -79,12 +80,15 @@ $result = $conn->query($sql);
             color: #333;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
+<<<<<<< HEAD
+=======
 
         .card p {
             font-size: 14px;
             color: #666;
             margin-top: 5px;
         }
+>>>>>>> main
 
         .back-button {
             position: absolute;
@@ -102,7 +106,7 @@ $result = $conn->query($sql);
 <body>
 
 <div class="back-button">
-    <a href="previous_page.php">←</a>
+    <a href="top.php">←</a>
 </div>
 
 <div class="container">
@@ -110,18 +114,21 @@ $result = $conn->query($sql);
     <div class="grid">
         <?php
         if ($result->num_rows > 0) {
-            // Output each entry
+            // 各エントリーを出力
             while($row = $result->fetch_assoc()) {
                 echo '<a href="character_detail.php?entry_id=' . $row['entry_id'] . '">';
                 echo '<div class="card">';
                 echo '<img src="' . $row['character_image'] . '" alt="' . $row['character_id'] . '">';
                 echo '<h3>' . $row['name'] . '</h3>';
+<<<<<<< HEAD
+=======
                 echo '<p>収穫した数: ' . $row['harvest_count'] . '人</p>';
+>>>>>>> main
                 echo '</div>';
                 echo '</a>';
             }
         } else {
-            echo "No characters found.";
+            echo "キャラクターが見つかりません";
         }
         $conn->close();
         ?>
