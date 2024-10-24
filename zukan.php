@@ -1,5 +1,16 @@
 <?php 
 session_start();
+
+// ログインしているか確認
+if (!isset($_SESSION['user_id'])) {
+    // ログインしていない場合はリダイレクト
+    header('Location: login.php');
+    exit();
+}
+
+// セッションからログイン中のユーザーIDを取得
+$user_id = $_SESSION['user_id'];
+
 // データベース接続情報
 $servername = "mysql311.phy.lolipop.lan";
 $username = "LAA1517492";
@@ -14,11 +25,15 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// zukanとcharactersテーブルからキャラクター情報を取得
+// ログインしているユーザーのキャラクター情報を取得
 $sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name 
         FROM zukan 
-        JOIN characters ON zukan.character_id = characters.character_id";
-$result = $conn->query($sql);
+        JOIN characters ON zukan.character_id = characters.character_id
+        WHERE zukan.user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -44,24 +59,23 @@ $result = $conn->query($sql);
         }
 
         .grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-.card {
-    background-color: white;
-    margin: 15px;
-    padding: 20px;
-    border-radius: 10px;
-    width: 250px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(145deg, #ffffff, #e6e6e6);
-    flex-basis: calc(33.333% - 30px); /* カードが一行に3つ表示されるように設定 */
-    box-sizing: border-box;
-}
-
+        .card {
+            background-color: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            width: 250px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            flex-basis: calc(33.333% - 30px); /* カードが一行に3つ表示されるように設定 */
+            box-sizing: border-box;
+        }
 
         .card:hover {
             transform: translateY(-10px);
@@ -118,7 +132,7 @@ $result = $conn->query($sql);
                 echo '</div>';
             }
         } else {
-            echo "キャラクターがinai";
+            echo "キャラクターが見つかりません";
         }
         $conn->close();
         ?>
