@@ -1,5 +1,6 @@
 <?php
 require 'db-connect.php';
+session_start(); // セッションを開始
 
 // キャラクター情報を取得するSQL文
 try {
@@ -16,7 +17,14 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 収穫されたなめこのデータを受け取る
     $characterName = $_POST['name'] ?? '';
-    $userId = 1; // ユーザーIDは動的に取得する必要があります（例: ログイン機能から）
+
+    // セッションからuser_idを取得
+    if (isset($_SESSION['user_id'])) {
+        $userId = $_SESSION['user_id']; // セッションからユーザーIDを取得
+    } else {
+        echo 'ユーザーIDが取得できません。ログインしてください。';
+        exit;
+    }
 
     // データベースに収穫ログを保存する
     try {
@@ -32,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
