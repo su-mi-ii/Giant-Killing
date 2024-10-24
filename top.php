@@ -84,15 +84,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         background: linear-gradient(to right, #ffb03c, #ff708d);
         color: #FFF;
         }
-        .pointbox p {
-            margin: 0; 
-            padding: 0;
-        }
+
         .pointbox-image {
-            margin-left: 1150px
+            float: right; /* 右に寄せる */
         }
-       
-    
+
+        .pointbox-image {
+            margin-left: auto; /* 自動で左側の余白を広げる */
+            margin-right: 0; /* 右側の余白を0に設定 */
+        }
+
+
+
         #main-button {
             position: absolute;
             left: 20px;
@@ -162,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- ポップアップボタン -->
     <div id="popup2" class="popup" onclick="navigateTo('start.php')"></div>
-    <div id="popup3" class="popup" onclick="navigateTo('setting.php')"></div>
+    <div id="popup3" class="popup" onclick="navigateTo('enviroment.php')"></div>
     <div id="popup4" class="popup" onclick="navigateTo('profile.php')"></div>
 </div>
 
