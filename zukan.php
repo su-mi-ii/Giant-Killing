@@ -115,7 +115,7 @@ $result = $conn->query($sql);
                 echo '</a>';
             }
         } else {
-            echo "キャラクターが見つかりません。";
+            echo "キャラクターが見つかりません";
         }
         $conn->close();
         ?>
