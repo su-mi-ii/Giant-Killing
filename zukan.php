@@ -44,21 +44,24 @@ $result = $conn->query($sql);
         }
 
         .grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
-        .card {
-            background-color: white;
-            margin: 15px;
-            padding: 20px;
-            border-radius: 10px;
-            width: 250px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            background: linear-gradient(145deg, #ffffff, #e6e6e6);
-        }
+.card {
+    background-color: white;
+    margin: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    flex-basis: calc(33.333% - 30px); /* カードが一行に3つ表示されるように設定 */
+    box-sizing: border-box;
+}
+
 
         .card:hover {
             transform: translateY(-10px);
@@ -80,15 +83,6 @@ $result = $conn->query($sql);
             color: #333;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
-<<<<<<< HEAD
-=======
-
-        .card p {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
-        }
->>>>>>> main
 
         .back-button {
             position: absolute;
@@ -116,16 +110,12 @@ $result = $conn->query($sql);
         if ($result->num_rows > 0) {
             // 各エントリーを出力
             while($row = $result->fetch_assoc()) {
-                echo '<a href="character_detail.php?entry_id=' . $row['entry_id'] . '">';
                 echo '<div class="card">';
+                echo '<a href="character_detail.php?entry_id=' . $row['entry_id'] . '">';
                 echo '<img src="' . $row['character_image'] . '" alt="' . $row['character_id'] . '">';
                 echo '<h3>' . $row['name'] . '</h3>';
-<<<<<<< HEAD
-=======
-                echo '<p>収穫した数: ' . $row['harvest_count'] . '人</p>';
->>>>>>> main
-                echo '</div>';
                 echo '</a>';
+                echo '</div>';
             }
         } else {
             echo "キャラクターが見つかりません";
