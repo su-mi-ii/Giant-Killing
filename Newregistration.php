@@ -102,15 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
-?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>新規登録</title>
     <style>
-        /* リセットスタイル */
+    /* リセットスタイル */
 * {
     margin: 0;
     padding: 0;
@@ -126,20 +124,24 @@ body {
     height: 100vh;
 }
 
-h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-}
-
-form {
+.container {
     background-color: #fff;
-    padding: 20px;
+    padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     width: 100%;
+    text-align: center;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+form {
+    margin-bottom: 10px;
 }
 
 label {
@@ -167,6 +169,7 @@ button {
     color: white;
     font-size: 16px;
     cursor: pointer;
+    margin-bottom: 10px;
 }
 
 button:hover {
@@ -188,35 +191,31 @@ button[type="submit"]:hover {
     background-color: #45a049;
 }
 
-form + form {
-    margin-top: 10px;
-}
-
-form button[type="submit"] {
+button[type="button"] {
     background-color: #555;
 }
 
-form button[type="submit"]:hover {
+button[type="button"]:hover {
     background-color: #333;
 }
 
         </style>
 </head>
 <body>
-    <h1>新規登録</h1>
-    <?php if (isset($error_message)) { echo '<p style="color:red;">' . htmlspecialchars($error_message) . '</p>'; } ?>
-    <form method="post">
-        <label for="user_name">ユーザー名:</label>
-        <input type="text" name="user_name" id="user_name" required>
-        <br>
-        <label for="password">パスワード:</label>
-        <input type="password" name="password" id="password" required>
-        <br>
-        <button type="submit">登録</button>
-    </form>
-    <form action="menu.php" method="get">
-        <button type="submit">戻る</button>
-    </form>
+    <div class="container">
+        <h1>新規登録</h1>
+        <form method="post">
+            <label for="user_name">ユーザー名</label>
+            <input type="text" name="user_name" id="user_name" required>
+            <label for="password">パスワード</label>
+            <input type="password" name="password" id="password" required>
+            <?php if (isset($error_message)) { echo '<p>' . htmlspecialchars($error_message) . '</p>'; } ?>
+            <button type="submit">登録</button>
+        </form>
+        <form action="menu.php">
+    <button type="button" onclick="window.location.href='menu.php';">戻る</button>
+</form>
+
+    </div>
 </body>
 </html>
-
