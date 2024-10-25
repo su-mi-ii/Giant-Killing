@@ -55,7 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (17, :user_id, 'image/☆５宮イダーマン.png', '普段は身バレ防止のためマスクをかぶっている　正体はニューヨークに住む平凡な大学生'),
                 (18, :user_id, 'image/☆５八木.png', '冷静かつ大胆な戦い方をするキャラクター。周囲の状況を見極め、最適な行動を取ることができる'),(19, :user_id, 'image/☆２南ジーニー.png', '神秘的な魔法のランプから召喚される、願いを叶える魔法使い。基本的には陽気で親切な性格だが、時には独特な方法で願いを叶えることもある。攻撃はすべて魔法を用いて行い、敵を幻惑するようなトリッキーな戦法を得意とする'),
                 (20, :user_id, 'image/☆２ハートの女王らいや.png', '愛と情熱を司る女王。心を操る魔法を使い、仲間には優しく、敵には厳しい一面を持つ。彼女の魔法は、味方の回復や敵の弱体化を得意とし、特に心に響く言葉で戦局を左右する'),
-                (21, :user_id, 'image/☆１テオくん.png', '若き探検家で、好奇心旺盛な少年。どんな困難にも立ち向かう勇気を持ち、チームを鼓舞するリーダー的存在。持ち前の明るさと元気で、仲間を元気づけるムードメーカーでもある。彼の得意技は「フレイムブレード」、燃え上がる剣で敵に突撃する熱血漢だ！');
+                (21, :user_id, 'image/☆１内山.png', '地道な努力を重ねる勤勉なキャラクター。控えめな性格だが、困ったときには頼れる存在で、何事もコツコツと積み上げるタイプ。得意技は「根気の一撃」、一見地味だが確実に効果を発揮する堅実な攻撃を繰り出す'),
+                (22, :user_id, 'image/☆３細川.png', '筋トレを愛するストイックなキャラクター。毎日欠かさずトレーニングを行い、強靭な筋肉と不屈の精神を持つ。得意技は「パワースマッシュ」、その鍛え上げられた腕力で敵を圧倒する。筋肉への情熱が周囲にも影響を与え、仲間を励ます力強い存在だ')
+
             ";
             $zukan_stmt = $pdo->prepare($zukan_sql);
             $zukan_stmt->bindParam(':user_id', $user_id);
@@ -102,15 +104,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
-?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>新規登録</title>
     <style>
-        /* リセットスタイル */
+    /* リセットスタイル */
 * {
     margin: 0;
     padding: 0;
@@ -126,20 +126,24 @@ body {
     height: 100vh;
 }
 
-h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-}
-
-form {
+.container {
     background-color: #fff;
-    padding: 20px;
+    padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     width: 100%;
+    text-align: center;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+form {
+    margin-bottom: 10px;
 }
 
 label {
@@ -167,6 +171,7 @@ button {
     color: white;
     font-size: 16px;
     cursor: pointer;
+    margin-bottom: 10px;
 }
 
 button:hover {
@@ -188,35 +193,31 @@ button[type="submit"]:hover {
     background-color: #45a049;
 }
 
-form + form {
-    margin-top: 10px;
-}
-
-form button[type="submit"] {
+button[type="button"] {
     background-color: #555;
 }
 
-form button[type="submit"]:hover {
+button[type="button"]:hover {
     background-color: #333;
 }
 
         </style>
 </head>
 <body>
-    <h1>新規登録</h1>
-    <?php if (isset($error_message)) { echo '<p style="color:red;">' . htmlspecialchars($error_message) . '</p>'; } ?>
-    <form method="post">
-        <label for="user_name">ユーザー名:</label>
-        <input type="text" name="user_name" id="user_name" required>
-        <br>
-        <label for="password">パスワード:</label>
-        <input type="password" name="password" id="password" required>
-        <br>
-        <button type="submit">登録</button>
-    </form>
-    <form action="menu.php" method="get">
-        <button type="submit">戻る</button>
-    </form>
+    <div class="container">
+        <h1>新規登録</h1>
+        <form method="post">
+            <label for="user_name">ユーザー名</label>
+            <input type="text" name="user_name" id="user_name" required>
+            <label for="password">パスワード</label>
+            <input type="password" name="password" id="password" required>
+            <?php if (isset($error_message)) { echo '<p>' . htmlspecialchars($error_message) . '</p>'; } ?>
+            <button type="submit">登録</button>
+        </form>
+        <form action="menu.php">
+    <button type="button" onclick="window.location.href='menu.php';">戻る</button>
+</form>
+
+    </div>
 </body>
 </html>
-

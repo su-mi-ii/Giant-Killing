@@ -1,5 +1,6 @@
 <?php
 require 'db-connect.php';
+session_start(); // セッションを開始
 
 // キャラクター情報を取得するSQL文
 try {
@@ -16,7 +17,14 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 収穫されたなめこのデータを受け取る
     $characterName = $_POST['name'] ?? '';
-    $userId = 1; // ユーザーIDは動的に取得する必要があります（例: ログイン機能から）
+
+    // セッションからuser_idを取得
+    if (isset($_SESSION['user_id'])) {
+        $userId = $_SESSION['user_id']; // セッションからユーザーIDを取得
+    } else {
+        echo 'ユーザーIDが取得できません。ログインしてください。';
+        exit;
+    }
 
     // データベースに収穫ログを保存する
     try {
@@ -32,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -75,15 +84,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         background: linear-gradient(to right, #ffb03c, #ff708d);
         color: #FFF;
         }
-        .pointbox p {
-            margin: 0; 
-            padding: 0;
-        }
+
         .pointbox-image {
-            margin-left: 1150px
+            float: right; /* 右に寄せる */
         }
-       
-    
+
+        .pointbox-image {
+            margin-left: auto; /* 自動で左側の余白を広げる */
+            margin-right: 0; /* 右側の余白を0に設定 */
+        }
+
+
+
         #main-button {
             position: absolute;
             left: 20px;
@@ -153,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- ポップアップボタン -->
     <div id="popup2" class="popup" onclick="navigateTo('start.php')"></div>
-    <div id="popup3" class="popup" onclick="navigateTo('setting.php')"></div>
+    <div id="popup3" class="popup" onclick="navigateTo('enviroment.php')"></div>
     <div id="popup4" class="popup" onclick="navigateTo('profile.php')"></div>
 </div>
 
