@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($item) {
-        // 価格を1.2倍にしてレベルを+1する
-        $new_price = ceil($item['price'] * 1.5); // 価格を切り上げ
+        // 価格を1.5倍にしてレベルを+1する
+        $new_price = ceil($item['price'] * 1.2); // 価格を切り上げ
         $new_level = $item['level'] + 1;
 
         // データベースを更新
@@ -127,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="container">
+    <a href="top.php" class="back-button">← 戻る</a>
         <?php if (!empty($items)): ?>
             <?php foreach ($items as $item): ?>
                 <div class="upgrade-item">
