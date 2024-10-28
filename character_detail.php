@@ -10,7 +10,7 @@ $dbname = "LAA1517492-giants";
 // 接続を作成
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// 接続
+// 接続確認
 if ($conn->connect_error) {
     die("接続失敗: " . $conn->connect_error);
 }
