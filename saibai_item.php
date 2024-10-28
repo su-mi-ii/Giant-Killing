@@ -7,7 +7,8 @@ if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
 
     // ユーザーごとの道具情報を取得
-    $sql = "SELECT tool_name, price, effect, tool_image FROM tools WHERE user_id = :user_id";
+    $sql = "SELECT tool_id, tool_name, price, effect, tool_image, level 
+            FROM tools WHERE user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
@@ -15,6 +16,38 @@ if (isset($_SESSION['user_id'])) {
 } else {
     echo 'ログインが必要です。';
     exit;
+}
+
+// レベルアップ処理
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tool_id = $_POST['tool_id'];
+
+    // 現在の価格とレベルを取得
+    $sql = "SELECT price, level FROM tools WHERE tool_id = :tool_id AND user_id = :user_id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $tool = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($tool) {
+        // 価格を1.5倍にしてレベルを+1する
+        $new_price = ceil($tool['price'] * 1.5); // 価格を切り上げ
+        $new_level = $tool['level'] + 1;
+
+        // データベースを更新
+        $sql = "UPDATE tools SET price = :new_price, level = :new_level 
+                WHERE tool_id = :tool_id AND user_id = :user_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':new_price', $new_price, PDO::PARAM_INT);
+        $stmt->bindParam(':new_level', $new_level, PDO::PARAM_INT);
+        $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header('Location: saibai_item.php'); // ページを再読み込み
+        exit;
+    }
 }
 ?>
 
@@ -26,14 +59,13 @@ if (isset($_SESSION['user_id'])) {
     <title>栽培道具</title>
     <style>
         body {
-            font-family: 'Helvetica', Arial, sans-serif;
-            background: linear-gradient(to bottom, #e0d4b0, #a69362);
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(to bottom, #f5f7fa, #c3cfe2);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
         }
 
         .container {
@@ -41,36 +73,21 @@ if (isset($_SESSION['user_id'])) {
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 30px;
+            gap: 20px;
             padding: 40px;
-            border-radius: 15px;
-            background-color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .exit-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-        }
-
-        .exit-button img {
-            width: 50px;
-            height: auto;
-            filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
+            width: 80%;
+            max-width: 1000px;
         }
 
         .upgrade-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            width: 150px;
-            height: 220px;
+            padding: 15px;
+            width: 180px;
             border: 2px solid #b08a3c;
             border-radius: 10px;
             background-color: #fff9e0;
@@ -80,58 +97,77 @@ if (isset($_SESSION['user_id'])) {
 
         .upgrade-item:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
         }
 
         .upgrade-item img {
             width: 80px;
             height: 80px;
             margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .upgrade-item h3 {
             font-size: 1.2rem;
             color: #b08a3c;
-            margin-bottom: 5px;
+            margin: 5px 0;
+            font-weight: bold;
         }
 
         .upgrade-item p {
+            margin: 5px 0;
             font-size: 0.9rem;
             color: #555;
-            margin: 0;
         }
 
         .upgrade-button {
             margin-top: 10px;
             padding: 8px 15px;
-            border: none;
-            background-color: #d4af37;
-            color: #fff;
             font-size: 0.9rem;
+            background-color: #d4af37;
+            color: white;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
         .upgrade-button:hover {
             background-color: #c4962e;
+            transform: translateY(-2px);
+        }
+
+        .exit-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .exit-button img {
+            width: 40px;
+            height: auto;
         }
     </style>
 </head>
 <body>
-
-    <button class="exit-button">
-        <img src="exit_icon.png" alt="Exit">
-    </button>
-
     <div class="container">
+    <a href="top.php" class="back-button">← 戻る</a>
         <?php if (!empty($tools)): ?>
             <?php foreach ($tools as $tool): ?>
                 <div class="upgrade-item">
                     <img src="<?= htmlspecialchars($tool['tool_image']) ?>" alt="<?= htmlspecialchars($tool['tool_name']) ?> Icon">
                     <h3><?= htmlspecialchars($tool['tool_name']) ?></h3>
-                    <p><?= htmlspecialchars($tool['effect']) ?></p>
-                    <button class="upgrade-button"><?= htmlspecialchars($tool['price']) ?>cでレベルアップ</button>
+                    <p>効果: <?= htmlspecialchars($tool['effect']) ?></p>
+                    <p>現在の価格: <?= htmlspecialchars($tool['price']) ?>c</p>
+                    <p>現在のレベル: <?= htmlspecialchars($tool['level']) ?></p>
+                    <form method="POST">
+                        <input type="hidden" name="tool_id" value="<?= $tool['tool_id'] ?>">
+                        <button class="upgrade-button">レベルアップ</button>
+                    </form>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>

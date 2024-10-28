@@ -64,32 +64,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $zukan_stmt->execute();
 
 
-             // itemテーブルの挿入
-             $item_sql = "
-             INSERT INTO items (user_id, item_name, price, effect, item_image)
-             VALUES
-             (:user_id, '栄養剤', 200, '成長速度上昇', 'image/eiyo.png'),
-             (:user_id, 'レア薬', 500, 'レアが多く生える', 'image/rea.png'),
-             (:user_id, 'カビ治療薬', 3000, 'カビが生えなくなる', 'image/kabi.png'),
-             (:user_id, '生命維持装置', 1500, '人間の生命を維持できる', 'image/seimei.png'),
-             (:user_id, 'レアアップ像', 2000, 'レアの確率を上げる', 'image/zou.png'),
-             (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png')
-         ";
-         $item_stmt = $pdo->prepare($item_sql);
-         $item_stmt->bindParam(':user_id', $user_id);
-         $item_stmt->execute();
+             // itemsテーブルの挿入
+            $item_sql = "
+            INSERT INTO items (user_id, item_name, price, effect, item_image, level)
+            VALUES
+            (:user_id, '栄養剤', 200, '成長速度上昇', 'image/eiyo.png', 1),
+            (:user_id, 'レア薬', 500, 'レアが多く生える', 'image/rea.png', 1),
+            (:user_id, 'カビ治療薬', 3000, 'カビが生えなくなる', 'image/kabi.png', 1),
+            (:user_id, '生命維持装置', 1500, '人間の生命を維持できる', 'image/seimei.png', 1),
+            (:user_id, 'レアアップ像', 2000, 'レアの確率を上げる', 'image/zou.png', 1),
+            (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png', 1)
+            ";
+            $item_stmt = $pdo->prepare($item_sql);
+            $item_stmt->bindParam(':user_id', $user_id);
+            $item_stmt->execute();
 
-         // toolsテーブルの挿入
-         $tools_sql = "
-             INSERT INTO tools (user_id, tool_name, effect, price, tool_image)
-             VALUES
-             (:user_id, '照明器', 'レア度上昇', 250, 'image/shoumei.png'),
-             (:user_id, '加湿器', '発生速度', 200, 'image/kasitu.png'),
-             (:user_id, '保温器', '枯れにくさ', 200, 'image/hoon.png')
-         ";
-         $tools_stmt = $pdo->prepare($tools_sql);
-         $tools_stmt->bindParam(':user_id', $user_id);
-         $tools_stmt->execute();
+            // toolsテーブルの挿入
+            $tools_sql = "
+            INSERT INTO tools (user_id, tool_name, effect, price, tool_image, level)
+            VALUES
+            (:user_id, '照明器', 'レア度上昇', 250, 'image/shoumei.png', 1),
+            (:user_id, '加湿器', '発生速度', 200, 'image/kasitu.png', 1),
+            (:user_id, '保温器', '枯れにくさ', 200, 'image/hoon.png', 1)
+            ";
+            $tools_stmt = $pdo->prepare($tools_sql);
+            $tools_stmt->bindParam(':user_id', $user_id);
+            $tools_stmt->execute();
 
          
             // 登録完了後 menu.php へリダイレクト
