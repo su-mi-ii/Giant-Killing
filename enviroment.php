@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($item) {
         // 価格を1.2倍にしてレベルを+1する
-        $new_price = ceil($item['price'] * 1.2); // 価格を切り上げ
+        $new_price = ceil($item['price'] * 1.5); // 価格を切り上げ
         $new_level = $item['level'] + 1;
 
         // データベースを更新
