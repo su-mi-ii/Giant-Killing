@@ -2,20 +2,53 @@
 require 'db-connect.php';
 session_start(); // セッションを開始
 
-// ユーザーがログインしているか確認
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // ログインしていない場合はログインページへリダイレクト
+// ログインしているユーザーのIDを取得
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+
+    // ユーザーごとのアイテム情報を取得
+    $sql = "SELECT item_id, item_name, price, effect, item_image, level 
+            FROM items WHERE user_id = :user_id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    echo 'ログインが必要です。';
     exit;
 }
 
-$user_id = $_SESSION['user_id']; // セッションからユーザーIDを取得
+// レベルアップ処理
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $item_id = $_POST['item_id'];
 
-// 現在のログインユーザーに関連するアイテムを取得
-$sql = "SELECT item_name, price, effect, item_image FROM items WHERE user_id = :user_id";
-$stmt = $pdo->prepare($sql);
-$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-$stmt->execute();
-$items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 現在の価格とレベルを取得
+    $sql = "SELECT price, level FROM items WHERE item_id = :item_id AND user_id = :user_id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($item) {
+        // 価格を1.2倍にしてレベルを+1する
+        $new_price = ceil($item['price'] * 1.2); // 価格を切り上げ
+        $new_level = $item['level'] + 1;
+
+        // データベースを更新
+        $sql = "UPDATE items SET price = :new_price, level = :new_level 
+                WHERE item_id = :item_id AND user_id = :user_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':new_price', $new_price, PDO::PARAM_INT);
+        $stmt->bindParam(':new_level', $new_level, PDO::PARAM_INT);
+        $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header('Location: enviroment.php'); // ページを再読み込み
+        exit;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -23,45 +56,27 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>レベルアップ</title>
+    <title>栽培環境</title>
     <style>
         body {
-            font-family: 'Helvetica', Arial, sans-serif;
-            background: linear-gradient(to bottom, #f2eecb, #c9af7a);
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #d0e0f0, #a0b0d0);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
         }
 
         .container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
-            gap: 60px;
+            gap: 50px;
             padding: 40px;
-            border-radius: 15px;
-            background-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .exit-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-        }
-
-        .exit-button img {
-            width: 50px;
-            height: auto;
-            filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .upgrade-item {
@@ -69,18 +84,11 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            width: 150px;
-            height: 220px;
-            border: 2px solid #d4af37;
+            border: 2px solid #b08a3c;
             border-radius: 10px;
-            background-color: #fffbe7;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .upgrade-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+            background-color: #fff9e0;
+            width: 160px;
+            text-align: center;
         }
 
         .upgrade-item img {
@@ -91,49 +99,51 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         .upgrade-item h3 {
             font-size: 1.2rem;
-            color: #d4af37;
-            margin-bottom: 5px;
+            color: #333;
+            margin: 5px 0;
         }
 
         .upgrade-item p {
+            margin: 5px 0;
             font-size: 0.9rem;
-            color: #555;
-            margin: 0;
+            color: #666;
         }
 
         .upgrade-button {
             margin-top: 10px;
             padding: 8px 15px;
-            border: none;
-            background-color: #e1a158;
-            color: #fff;
             font-size: 0.9rem;
+            background-color: #4caf50;
+            color: white;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
 
         .upgrade-button:hover {
-            background-color: #d19451;
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-
-    <button class="exit-button">
-    <a href="top.php">←</a>
-    </button>
-
     <div class="container">
-        <?php foreach ($items as $item): ?>
-            <div class="upgrade-item">
-                <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?> Icon">
-                <h3><?= htmlspecialchars($item['item_name']) ?></h3>
-                <p><?= htmlspecialchars($item['effect']) ?></p>
-                <button class="upgrade-button"><?= htmlspecialchars($item['price']) ?>cでレベルアップ</button>
-            </div>
-        <?php endforeach; ?>
+        <?php if (!empty($items)): ?>
+            <?php foreach ($items as $item): ?>
+                <div class="upgrade-item">
+                    <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>">
+                    <h3><?= htmlspecialchars($item['item_name']) ?></h3>
+                    <p>効果: <?= htmlspecialchars($item['effect']) ?></p>
+                    <p>現在の価格: <?= htmlspecialchars($item['price']) ?>c</p>
+                    <p>現在のレベル: <?= htmlspecialchars($item['level']) ?></p>
+                    <form method="POST">
+                        <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
+                        <button class="upgrade-button">レベルアップ</button>
+                    </form>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>アイテムが見つかりません。</p>
+        <?php endif; ?>
     </div>
-
 </body>
 </html>
