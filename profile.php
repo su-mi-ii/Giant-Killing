@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// ユーザー名を取得
 $sql_user = "SELECT user_name FROM users WHERE user_id = ?";
 $stmt_user = $pdo->prepare($sql_user);
 $stmt_user->execute([$user_id]);
@@ -16,29 +17,28 @@ $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
 
 $user_name = $user ? $user['user_name'] : 'Unknown User';
 
-$sql_icon = "
-    SELECT z.character_image 
-    FROM zukan z 
-    WHERE z.user_id = ? 
-    LIMIT 1
-";
+// 現在のプロフィールアイコンを取得
+$sql_icon = "SELECT character_image FROM zukan WHERE user_id = ? LIMIT 1";
 $stmt_icon = $pdo->prepare($sql_icon);
 $stmt_icon->execute([$user_id]);
 $icon = $stmt_icon->fetch(PDO::FETCH_ASSOC);
 
 $character_image = $icon ? $icon['character_image'] : 'default_icon.png';
 
-$sql_harvest = "
-    SELECT COUNT(DISTINCT character_id) AS discovered_characters, COUNT(*) AS total_harvest 
-    FROM harvest_log 
-    WHERE user_id = ?
-";
+// 収穫情報を取得
+$sql_harvest = "SELECT COUNT(DISTINCT character_id) AS discovered_characters, COUNT(*) AS total_harvest FROM harvest_log WHERE user_id = ?";
 $stmt_harvest = $pdo->prepare($sql_harvest);
 $stmt_harvest->execute([$user_id]);
 $harvest = $stmt_harvest->fetch(PDO::FETCH_ASSOC);
 
 $discovered_characters = $harvest['discovered_characters'] ?? 0;
 $total_harvest = $harvest['total_harvest'] ?? 0;
+
+// zukanテーブルから重複しないキャラクター情報を取得
+$sql_characters = "SELECT DISTINCT character_id, character_image FROM zukan WHERE user_id = ?";
+$stmt_characters = $pdo->prepare($sql_characters);
+$stmt_characters->execute([$user_id]);
+$characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -49,65 +49,175 @@ $total_harvest = $harvest['total_harvest'] ?? 0;
     <title>Ningen License Card</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #d6d6d6;
+            background-image: url('image/aig-ai221017149-xl_TP_V.webp');
+            background-size: cover;
+            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
+
         .card-container {
-            background-color: #c2a562;
+            background-color: rgba(194, 165, 98, 0.9);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             text-align: center;
-            width: 300px;
+            width: 700px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
         }
+
+        .card-container:hover {
+            transform: translateY(-10px);
+        }
+
         .back-button {
             position: absolute;
             top: 20px;
             left: 20px;
-            font-size: 1.5rem;
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
             text-decoration: none;
-            color: #000;
+            transition: background-color 0.3s;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
+
+        .back-button:hover {
+            background-color: #a6713d;
+        }
+
+        .icon-container {
+            position: relative;
+            display: inline-block;
+        }
+
         .icon-image {
             border-radius: 50%;
             width: 100px;
             height: 100px;
             object-fit: cover;
+            transition: transform 0.3s ease-in-out;
         }
+
+        .icon-image:hover {
+            transform: scale(1.1);
+        }
+
         .info {
             margin: 10px 0;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             color: #fff;
+            letter-spacing: 1px;
+            font-weight: bold;
         }
+
         .harvest-info {
             margin-top: 15px;
-            background-color: #8b5e34;
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
             padding: 10px;
             border-radius: 5px;
             color: #fff;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.1rem;
+        }
+
+        .character-grid {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+            position: absolute; /* アイコンの下に表示 */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            z-index: 10; /* 他の要素の上に表示 */
+        }
+
+        .icon-container:hover .character-grid {
+            display: grid;
+        }
+
+        .character-grid img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 5px;
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        .character-grid img:hover {
+            transform: scale(1.1);
         }
     </style>
+    <script>
+        function changeIcon(newIcon) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'update_icon.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // アイコンを更新
+                    document.querySelector('.icon-image').src = newIcon;
+                }
+            };
+            xhr.send('new_icon=' + encodeURIComponent(newIcon));
+        }
+
+        // グリッドをマウスオーバーで表示
+        document.addEventListener('DOMContentLoaded', () => {
+            const iconContainer = document.querySelector('.icon-container');
+            const characterGrid = document.querySelector('.character-grid');
+
+            let hideTimeout; // 隠すタイマー
+
+            iconContainer.addEventListener('mouseenter', () => {
+                characterGrid.style.display = 'grid';
+            });
+
+            iconContainer.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    characterGrid.style.display = 'none';
+                }, 300); // 300ミリ秒の遅延
+            });
+
+            characterGrid.addEventListener('mouseenter', () => {
+                clearTimeout(hideTimeout); // グリッドにマウスが入ったらタイマーをクリア
+            });
+
+            characterGrid.addEventListener('mouseleave', () => {
+                characterGrid.style.display = 'none'; // グリッドが外れたら即時非表示
+            });
+        });
+    </script>
 </head>
 <body>
 
-    <!-- Back Button -->
     <a href="top.php" class="back-button">← 戻る</a>
 
-    <!-- Ningen License Card -->
     <div class="card-container">
         <h2>Ningen License Card</h2>
 
-        <!-- User Icon -->
-        <img src="<?= htmlspecialchars($character_image) ?>" alt="User Icon" class="icon-image">
+        <div class="icon-container">
+            <img src="<?= htmlspecialchars($character_image) ?>" alt="User Icon" class="icon-image">
+            <div class="character-grid">
+                <?php foreach ($characters as $character): ?>
+                    <img src="<?= htmlspecialchars($character['character_image']) ?>" alt="Character Image" onclick="changeIcon('<?= htmlspecialchars($character['character_image']) ?>')">
+                <?php endforeach; ?>
+            </div>
+        </div>
 
-        <!-- User Name -->
         <div class="info"><?= htmlspecialchars($user_name) ?></div>
 
-        <!-- Harvest Info -->
         <div class="harvest-info">
             <div>発見した人間: <?= htmlspecialchars($discovered_characters) ?>人</div>
             <div>収穫総数: <?= htmlspecialchars($total_harvest) ?>人</div>
