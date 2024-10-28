@@ -122,7 +122,7 @@ $result = $stmt->get_result();
     <div class="grid">
         <?php
         if ($result->num_rows > 0) {
-            
+            // 各エントリーを出力
             while($row = $result->fetch_assoc()) {
                 echo '<div class="card">';
                 echo '<a href="character_detail.php?entry_id=' . $row['entry_id'] . '">';
