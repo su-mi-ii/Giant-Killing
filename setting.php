@@ -136,7 +136,7 @@
         </div>
 
         <div class="return-title">
-            <a href="title_page.php">タイトルへ戻る</a>
+            <a href="menu.php">タイトルへ戻る</a>
         </div>
     </div>
 
