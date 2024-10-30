@@ -55,39 +55,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (17, :user_id, 'image/☆５宮イダーマン.png', '普段は身バレ防止のためマスクをかぶっている　正体はニューヨークに住む平凡な大学生'),
                 (18, :user_id, 'image/☆５八木.png', '冷静かつ大胆な戦い方をするキャラクター。周囲の状況を見極め、最適な行動を取ることができる'),(19, :user_id, 'image/☆２南ジーニー.png', '神秘的な魔法のランプから召喚される、願いを叶える魔法使い。基本的には陽気で親切な性格だが、時には独特な方法で願いを叶えることもある。攻撃はすべて魔法を用いて行い、敵を幻惑するようなトリッキーな戦法を得意とする'),
                 (20, :user_id, 'image/☆２ハートの女王らいや.png', '愛と情熱を司る女王。心を操る魔法を使い、仲間には優しく、敵には厳しい一面を持つ。彼女の魔法は、味方の回復や敵の弱体化を得意とし、特に心に響く言葉で戦局を左右する'),
-                (21, :user_id, 'image/☆１テオくん.png', '若き探検家で、好奇心旺盛な少年。どんな困難にも立ち向かう勇気を持ち、チームを鼓舞するリーダー的存在。持ち前の明るさと元気で、仲間を元気づけるムードメーカーでもある。彼の得意技は「フレイムブレード」、燃え上がる剣で敵に突撃する熱血漢だ！');
+                (21, :user_id, 'image/☆１内山.png', '地道な努力を重ねる勤勉なキャラクター。控えめな性格だが、困ったときには頼れる存在で、何事もコツコツと積み上げるタイプ。得意技は「根気の一撃」、一見地味だが確実に効果を発揮する堅実な攻撃を繰り出す'),
+                (22, :user_id, 'image/☆３細川.png', '筋トレを愛するストイックなキャラクター。毎日欠かさずトレーニングを行い、強靭な筋肉と不屈の精神を持つ。得意技は「パワースマッシュ」、その鍛え上げられた腕力で敵を圧倒する。筋肉への情熱が周囲にも影響を与え、仲間を励ます力強い存在だ')
+
             ";
             $zukan_stmt = $pdo->prepare($zukan_sql);
             $zukan_stmt->bindParam(':user_id', $user_id);
             $zukan_stmt->execute();
 
 
-             // itemテーブルの挿入
-             $item_sql = "
-             INSERT INTO items (user_id, item_name, price, effect, item_image)
-             VALUES
-             (:user_id, '栄養剤', 200, '成長速度上昇', 'image/eiyo.png'),
-             (:user_id, 'レア薬', 500, 'レアが多く生える', 'image/rea.png'),
-             (:user_id, 'カビ治療薬', 3000, 'カビが生えなくなる', 'image/kabi.png'),
-             (:user_id, '生命維持装置', 1500, '人間の生命を維持できる', 'image/seimei.png'),
-             (:user_id, 'レアアップ像', 2000, 'レアの確率を上げる', 'image/zou.png'),
-             (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png')
-         ";
-         $item_stmt = $pdo->prepare($item_sql);
-         $item_stmt->bindParam(':user_id', $user_id);
-         $item_stmt->execute();
+             // itemsテーブルの挿入
+            $item_sql = "
+            INSERT INTO items (user_id, item_name, price, effect, item_image, level)
+            VALUES
+            (:user_id, '栄養剤', 200, '成長速度上昇', 'image/eiyo.png', 1),
+            (:user_id, 'レア薬', 500, 'レアが多く生える', 'image/rea.png', 1),
+            (:user_id, 'カビ治療薬', 3000, 'カビが生えなくなる', 'image/kabi.png', 1),
+            (:user_id, '生命維持装置', 1500, '人間の生命を維持できる', 'image/seimei.png', 1),
+            (:user_id, 'レアアップ像', 2000, 'レアの確率を上げる', 'image/zou.png', 1),
+            (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png', 1)
+            ";
+            $item_stmt = $pdo->prepare($item_sql);
+            $item_stmt->bindParam(':user_id', $user_id);
+            $item_stmt->execute();
 
-         // toolsテーブルの挿入
-         $tools_sql = "
-             INSERT INTO tools (user_id, tool_name, effect, price, tool_image)
-             VALUES
-             (:user_id, '照明器', 'レア度上昇', 250, 'image/shoumei.png'),
-             (:user_id, '加湿器', '発生速度', 200, 'image/kasitu.png'),
-             (:user_id, '保温器', '枯れにくさ', 200, 'image/hoon.png')
-         ";
-         $tools_stmt = $pdo->prepare($tools_sql);
-         $tools_stmt->bindParam(':user_id', $user_id);
-         $tools_stmt->execute();
+            // toolsテーブルの挿入
+            $tools_sql = "
+            INSERT INTO tools (user_id, tool_name, effect, price, tool_image, level)
+            VALUES
+            (:user_id, '照明器', 'レア度上昇', 250, 'image/shoumei.png', 1),
+            (:user_id, '加湿器', '発生速度', 200, 'image/kasitu.png', 1),
+            (:user_id, '保温器', '枯れにくさ', 200, 'image/hoon.png', 1)
+            ";
+            $tools_stmt = $pdo->prepare($tools_sql);
+            $tools_stmt->bindParam(':user_id', $user_id);
+            $tools_stmt->execute();
 
          
             // 登録完了後 menu.php へリダイレクト
