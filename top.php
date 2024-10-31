@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <br>
         <div class="pointbox-image">
-            <a href="">
+            <a href="Miyakoku.php">
                 <img src="image/koukoku.webp" alt="広告" width="100" height="100">
             </a>
             <a href="zukan.php">
@@ -216,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     <script>
-        const growthTime = 5000;
+        const growthTime = 10000;
         let namekos = []; // 成長したなめこの配列
         const maxNamekos = 24; // 最大のなめこの数
 
