@@ -53,6 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             text-align: center;
+            background-image: url('image/gensou.webp');
+            background-size: cover; /* 全画面に拡大 */
+            background-position: center;
         }
 
         #nameko-container {
@@ -68,30 +71,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: absolute;
         }
 
+
         .log {
             width: 100%;
-            height: 460px;
-            background-image: url('image/ki.png');
-            background-size: cover;
+            height: 100vh; /* 画面の高さに合わせる */
             position: relative;
             margin: 0 auto;
         }
 
+
         .pointbox{
-        padding: 0.5em 1em;
-        background: -moz-linear-gradient(#ffb03c, #ff708d);
-        background: -webkit-linear-gradient(#ffb03c, #ff708d);
-        background: linear-gradient(to right, #ffb03c, #ff708d);
-        color: #FFF;
+            padding: 0.5em 1em;
+            background: -moz-linear-gradient(#ffb03c, #ff708d);
+            background: -webkit-linear-gradient(#ffb03c, #ff708d);
+            background: linear-gradient(to right, #ffb03c, #ff708d);
+            color: #FFF;
+            position: absolute;
+            right: 20px;
+
         }
 
         .pointbox-image {
-            float: right; /* 右に寄せる */
-        }
-
-        .pointbox-image {
-            margin-left: auto; /* 自動で左側の余白を広げる */
-            margin-right: 0; /* 右側の余白を0に設定 */
+            float: right;
+            position: relative; /* 必要に応じて追加 */
+            z-index: 10; /* 他の要素より前面に表示されるように */
+            margin-left: auto;
+            margin-right: 30px;
+            top: 70px;
         }
 
 
@@ -138,10 +144,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-    <div class="container">
         <div class="pointbox">
         <p>👛　　0 point</p>
         </div>
+    <br>
         <div class="pointbox-image">
             <a href="">
                 <img src="image/koukoku.webp" alt="広告" width="100" height="100">
@@ -157,7 +163,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="log"></div>
         </div>
         <div id="message"></div>
-    </div>
 
     <div id="container">
     <!-- メインボタン -->
@@ -224,17 +229,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // なめこを自動で育てる関数
         function growNameko() {
             if (namekos.length < maxNamekos) {
-                message.textContent = 'なめこが育っています...';
 
                 setTimeout(() => {
                     // ランダムにキャラクターを選択して追加
                     const nameko = getRandomCharacter();
                     namekos.push(nameko);
-                    message.textContent = 'なめこが成長しました！';
                     displayNamekos();
                 }, growthTime);
             } else {
-                message.textContent = 'なめこはもうこれ以上育ちません。';
             }
         }
 
@@ -260,20 +262,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 成長機能のセットアップ
         setInterval(growNameko, growthTime + 1000);
 
-        // なめこを表示する関数
-        function displayNamekos() {
+       // なめこを表示する関数
+       function displayNamekos() {
             namekoContainer.innerHTML = '<div class="log"></div>';
-            const logHeight = 460;
+            const logHeight = window.innerHeight; // 画面の高さに基づく
             const totalColumns = 12;
             const totalRows = 2;
             const columnWidth = namekoContainer.offsetWidth / totalColumns;
             const rowHeight = logHeight / (totalRows + 1);
+            
+            // 動的にオフセットを設定（必要に応じて調整）
+            const yOffset = logHeight * 0.1; // 画面の10%をオフセットとして設定
 
             namekos.forEach((nameko, index) => {
                 const namekoElement = document.createElement('span');
                 namekoElement.classList.add('nameko');
 
-                // キャラクターの画像を表示
                 const imgElement = document.createElement('img');
                 imgElement.src = nameko.character_image;
                 imgElement.alt = nameko.name;
@@ -287,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const positionInRow = index % totalColumns;
                 const rowIndex = Math.floor(index / totalColumns);
                 const xPosition = positionInRow * columnWidth;
-                const yPosition = logHeight - (rowHeight * (rowIndex + 1));
+                const yPosition = logHeight - (rowHeight * (rowIndex + 1)) - yOffset;
 
                 namekoElement.style.left = `${xPosition}px`;
                 namekoElement.style.bottom = `${yPosition}px`;
@@ -295,6 +299,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 namekoContainer.appendChild(namekoElement);
             });
         }
+
+
+        
 
         // なめこを収穫する関数
         function harvestNameko(index) {
