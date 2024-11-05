@@ -106,7 +106,7 @@
 
     <div class="settings-container">
         <div class="back-button">
-            <a href="previous_page.php">←</a>
+            <a href="top.php">←</a>
         </div>
 
         <h2>サウンド</h2>
