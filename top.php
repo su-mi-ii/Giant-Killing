@@ -2,45 +2,45 @@
 require 'db-connect.php';
 session_start(); // セッションを開始
 
-// キャラクター情報を取得するSQL文
+// キャラクター情報を取得
 try {
-    $sql = "SELECT name, rarity, character_image FROM characters";
+    $sql = "SELECT name, rarity, character_image, point FROM characters";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
-    $characters = $stmt->fetchAll(PDO::FETCH_ASSOC); // キャラクター情報を取得
+    $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo 'データ取得エラー: ' . htmlspecialchars($e->getMessage());
     exit;
 }
 
-// なめこ収穫時の処理（POSTリクエストによる処理）
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 収穫されたなめこのデータを受け取る
+// セッションでユーザーの合計ポイントを管理
+if (!isset($_SESSION['total_points'])) {
+    $_SESSION['total_points'] = 0;
+}
+$totalPoints = $_SESSION['total_points'];
+
+// なめこ収穫時のPOSTリクエスト処理
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     $characterName = $_POST['name'] ?? '';
+    $characterPoint = (int)($_POST['point'] ?? 0); // 収穫したキャラクターのポイント
 
-    // セッションからuser_idを取得
-    if (isset($_SESSION['user_id'])) {
-        $userId = $_SESSION['user_id']; // セッションからユーザーIDを取得
-    } else {
-        echo 'ユーザーIDが取得できません。ログインしてください。';
-        exit;
-    }
-
-    // データベースに収穫ログを保存する
     try {
+        // 収穫ログを保存
         $sql = "INSERT INTO harvest_log (user_id, character_id) 
                 VALUES (:user_id, (SELECT character_id FROM characters WHERE name = :name LIMIT 1))";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
         $stmt->bindParam(':name', $characterName, PDO::PARAM_STR);
         $stmt->execute();
-        echo '収穫ログが正常に保存されました。';
+
+        // ポイントを加算し、セッションに保存
+        $_SESSION['total_points'] += $characterPoint;
+        echo $_SESSION['total_points']; // 合計ポイントを返す
     } catch (PDOException $e) {
-        echo '収穫ログ保存エラー: ' . htmlspecialchars($e->getMessage());
+        echo 'エラー: ' . htmlspecialchars($e->getMessage());
     }
     exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>なめこ栽培キッド</title>
     <style>
-        body {
+       body {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             text-align: center;
@@ -144,184 +144,124 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-        <div class="pointbox">
-        <p>👛　　0 point</p>
-        </div>
-    <br>
-        <div class="pointbox-image">
-            <a href="">
-                <img src="image/koukoku.webp" alt="広告" width="100" height="100">
-            </a>
-            <a href="zukan.php">
-                <img src="image/zukan.webp" alt="図鑑" width="100" height="100">
-            </a>
-            <a href="setting.php">
-                <img src="image/setei.webp" alt="設定" width="100" height="100">
-            </a>
-        </div>
-        <div id="nameko-container">
+    <!-- 合計ポイント表示 -->
+    <div class="pointbox">
+        <p>👛　　<?php echo htmlspecialchars($totalPoints); ?> point</p>
+    </div>
+
+    <!-- 各種リンク、メインボタン、ポップアップボタン -->
+    <div class="pointbox-image">
+        <a href="Miyakoku.php"><img src="image/koukoku.webp" alt="広告" width="100" height="100"></a>
+        <a href="zukan.php"><img src="image/zukan.webp" alt="図鑑" width="100" height="100"></a>
+        <a href="setting.php"><img src="image/setei.webp" alt="設定" width="100" height="100"></a>
+    </div>
+
+    <!-- なめこコンテナ -->
+    <div id="nameko-container">
         <div class="log"></div>
-        </div>
-        <div id="message"></div>
+    </div>
 
     <div id="container">
-    <!-- メインボタン -->
-    <div id="main-button"></div>
-
-    <!-- ポップアップボタン -->
-    <div id="popup2" class="popup" onclick="navigateTo('start.php')"></div>
-    <div id="popup3" class="popup" onclick="navigateTo('enviroment.php')"></div>
-    <div id="popup4" class="popup" onclick="navigateTo('profile.php')"></div>
-</div>
-
-<script>
-    let isVisible = false;
-
-    document.getElementById('main-button').addEventListener('click', function() {
-        isVisible = !isVisible;
-        togglePopups(isVisible);
-    });
-
-    function togglePopups(show) {
-        const popups = document.querySelectorAll('.popup');
-        popups.forEach(popup => {
-            popup.style.display = show ? 'block' : 'none';
-        });
-    }
-
-    function navigateTo(page) {
-        window.location.href = page;
-    }
-</script>
-
-<script>
-    let isVisible = false;
-
-    document.getElementById('main-button').addEventListener('click', function() {
-        isVisible = !isVisible;
-        togglePopups(isVisible);
-    });
-
-    function togglePopups(show) {
-        const popups = document.querySelectorAll('.popup');
-        popups.forEach(popup => {
-            popup.style.display = show ? 'block' : 'none';
-        });
-    }
-
-    function navigateTo(page) {
-        window.location.href = page;
-    }
-</script>
-
+        <div id="main-button"></div>
+        <div id="popup2" class="popup" onclick="navigateTo('start.php')"></div>
+        <div id="popup3" class="popup" onclick="navigateTo('enviroment.php')"></div>
+        <div id="popup4" class="popup" onclick="navigateTo('profile.php')"></div>
+    </div>
 
     <script>
-        const growthTime = 5000;
-        let namekos = []; // 成長したなめこの配列
-        const maxNamekos = 24; // 最大のなめこの数
+        let isVisible = false;
+        document.getElementById('main-button').addEventListener('click', function() {
+            isVisible = !isVisible;
+            togglePopups(isVisible);
+        });
 
-        // PHPから取得したキャラクター情報をJavaScriptに渡す
+        function togglePopups(show) {
+            const popups = document.querySelectorAll('.popup');
+            popups.forEach(popup => popup.style.display = show ? 'block' : 'none');
+        }
+
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // PHPからキャラクター情報を取得
         const characters = <?php echo json_encode($characters, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+        let namekos = [];
+        const maxNamekos = 24;
+        const growthTime = 5000;
 
-        const namekoContainer = document.getElementById('nameko-container');
-        const message = document.getElementById('message');
-
-        // なめこを自動で育てる関数
+        // なめこを成長させる関数
         function growNameko() {
             if (namekos.length < maxNamekos) {
-
                 setTimeout(() => {
-                    // ランダムにキャラクターを選択して追加
-                    const nameko = getRandomCharacter();
-                    namekos.push(nameko);
+                    namekos.push(getRandomCharacter());
                     displayNamekos();
                 }, growthTime);
-            } else {
             }
         }
 
-        // レアリティに基づいてキャラクターを選択する関数
         function getRandomCharacter() {
-            const probabilities = characters.map(character => 1 / character.rarity); // レアリティに基づく逆比例の確率
+            const probabilities = characters.map(character => 1 / character.rarity);
             const totalProbability = probabilities.reduce((sum, prob) => sum + prob, 0);
-            const normalizedProbabilities = probabilities.map(prob => prob / totalProbability); // 確率を正規化
-
+            const normalizedProbabilities = probabilities.map(prob => prob / totalProbability);
             const randomValue = Math.random();
             let cumulativeProbability = 0;
 
             for (let i = 0; i < normalizedProbabilities.length; i++) {
                 cumulativeProbability += normalizedProbabilities[i];
-                if (randomValue < cumulativeProbability) {
-                    return characters[i]; // 選択されたキャラクターを返す
-                }
+                if (randomValue < cumulativeProbability) return characters[i];
             }
-
-            return characters[0]; // デフォルト（この行には到達しないはず）
+            return characters[0];
         }
 
-        // 成長機能のセットアップ
         setInterval(growNameko, growthTime + 1000);
 
-       // なめこを表示する関数
-       function displayNamekos() {
+                function displayNamekos() {
+            const namekoContainer = document.getElementById('nameko-container');
             namekoContainer.innerHTML = '<div class="log"></div>';
-            const logHeight = window.innerHeight; // 画面の高さに基づく
-            const totalColumns = 12;
-            const totalRows = 2;
-            const columnWidth = namekoContainer.offsetWidth / totalColumns;
-            const rowHeight = logHeight / (totalRows + 1);
-            
-            // 動的にオフセットを設定（必要に応じて調整）
-            const yOffset = logHeight * 0.1; // 画面の10%をオフセットとして設定
+            const containerWidth = namekoContainer.offsetWidth;
+            const logHeight = window.innerHeight * 0.8;
+            const totalColumns = 14;
+            const offsetY = 150; // 位置を下げるオフセット（px単位）
 
             namekos.forEach((nameko, index) => {
                 const namekoElement = document.createElement('span');
-                namekoElement.classList.add('nameko');
-
                 const imgElement = document.createElement('img');
                 imgElement.src = nameko.character_image;
                 imgElement.alt = nameko.name;
-                imgElement.title = nameko.name + " - " + nameko.rarity;
-                imgElement.style.width = '100px';
-                imgElement.style.height = '100px';
-
+                imgElement.title = `${nameko.name} - ${nameko.rarity}`;
+                imgElement.style.width = '80px';
+                imgElement.style.height = '80px';
                 namekoElement.appendChild(imgElement);
                 namekoElement.addEventListener('click', () => harvestNameko(index));
 
-                const positionInRow = index % totalColumns;
-                const rowIndex = Math.floor(index / totalColumns);
-                const xPosition = positionInRow * columnWidth;
-                const yPosition = logHeight - (rowHeight * (rowIndex + 1)) - yOffset;
-
+                const xPosition = (index % totalColumns) * (containerWidth / (totalColumns + 2));
+                const yPosition = logHeight - (100 * Math.floor(index / totalColumns)) - offsetY;
                 namekoElement.style.left = `${xPosition}px`;
                 namekoElement.style.bottom = `${yPosition}px`;
-
+                namekoElement.style.position = 'absolute';
                 namekoContainer.appendChild(namekoElement);
             });
         }
 
 
-        
-
-        // なめこを収穫する関数
+        // なめこを収穫
         function harvestNameko(index) {
-            const nameko = namekos[index]; // 収穫するなめこの情報
-            namekos.splice(index, 1); // なめこを配列から削除
-            message.textContent = 'なめこを収穫しました！';
+            const nameko = namekos[index];
+            namekos.splice(index, 1);
             displayNamekos();
 
-            // サーバーに収穫したなめこ情報を送信
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '', true); // 同じページにPOSTリクエストを送信
+            xhr.open('POST', '', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    console.log(xhr.responseText); // 成功メッセージ
+                    document.querySelector('.pointbox p').textContent = `👛 ${xhr.responseText} point`;
                 } else {
-                    console.error('収穫ログの送信に失敗しました。');
+                    console.error('エラー: サーバーへの収穫ログ送信に失敗しました。');
                 }
             };
-            xhr.send(`name=${encodeURIComponent(nameko.name)}`);
+            xhr.send(`name=${encodeURIComponent(nameko.name)}&point=${nameko.point}`);
         }
     </script>
 </body>
