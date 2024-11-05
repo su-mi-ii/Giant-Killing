@@ -141,6 +141,8 @@
     </div>
 
     <audio id="bgm-audio" src="" loop></audio>
+    <audio id="bgm-audio" src="" loop autoplay muted></audio>
+
 
     <script>
         const bgmAudio = document.getElementById('bgm-audio');
@@ -158,8 +160,8 @@
 
         const bgmTitle = document.getElementById('bgm-title');
         const bgmTracks = [
-            { title: '朝の歌', src: 'audio/Morning.mp3' }, 
-            { title: '別の曲', src: 'audio/Song2.mp3' }
+            { title: '朝の歌', src: 'BGM/Morning.mp3' }, 
+            { title: '別の曲', src: 'BGM/Song2.mp3' }
         ]; 
         let currentTrackIndex = 0;
 
@@ -180,10 +182,14 @@
         }
 
         window.onload = function() {
-            bgmAudio.src = bgmTracks[0].src; 
-            bgmAudio.play();
-            bgmTitle.textContent = bgmTracks[0].title; 
-        };
+    bgmAudio.src = bgmTracks[0].src; 
+    bgmAudio.muted = false; // 自動再生時にミュート解除
+    bgmAudio.play().catch(error => {
+        console.log("自動再生がブロックされました。ユーザーの操作が必要です。");
+    });
+    bgmTitle.textContent = bgmTracks[0].title;
+};
+
     </script>
 
 </body>
