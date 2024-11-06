@@ -1,53 +1,57 @@
 <?php
+// db-connect.php の読み込みとセッションの開始
 require 'db-connect.php';
-session_start(); // セッションを開始
+session_start();
 
 // ログインしているユーザーのIDを取得
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
 
-    // ユーザーごとのアイテム情報を取得
-    $sql = "SELECT item_id, item_name, price, effect, item_image, level 
-            FROM items WHERE user_id = :user_id";
+    // ユーザーのアイテム情報を取得
+    $sql = "SELECT item_id, item_name, price, effect, item_image, level FROM items WHERE user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // 広告消去アイテムが購入済みか確認
+    $sql = "SELECT level FROM items WHERE user_id = :user_id AND item_name = 'バナー広告消去権'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $adRemovalItem = $stmt->fetch(PDO::FETCH_ASSOC);
+    $hasAdRemoval = $adRemovalItem && $adRemovalItem['level'] > 0; // レベルが1以上の場合は購入済み
 } else {
     echo 'ログインが必要です。';
     exit;
 }
 
-// レベルアップ処理
+// 購入処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = $_POST['item_id'];
 
-    // 現在の価格とレベルを取得
-    $sql = "SELECT price, level FROM items WHERE item_id = :item_id AND user_id = :user_id";
+    // 広告消去アイテムが既に購入されていないかチェック
+    $sql = "SELECT item_name FROM items WHERE item_id = :item_id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($item) {
-        // 価格を1.5倍にしてレベルを+1する
-        $new_price = ceil($item['price'] * 1.2); // 価格を切り上げ
-        $new_level = $item['level'] + 1;
-
-        // データベースを更新
-        $sql = "UPDATE items SET price = :new_price, level = :new_level 
-                WHERE item_id = :item_id AND user_id = :user_id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':new_price', $new_price, PDO::PARAM_INT);
-        $stmt->bindParam(':new_level', $new_level, PDO::PARAM_INT);
-        $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->execute();
-
-        header('Location: enviroment.php'); // ページを再読み込み
+    if ($item['item_name'] === 'バナー広告消去権' && $hasAdRemoval) {
+        echo "すでに広告消去権を購入しています。";
         exit;
     }
+
+    // 通常のアイテム購入処理（価格を1.2倍、レベル+1）
+    $sql = "UPDATE items SET price = price * 1.2, level = level + 1 WHERE item_id = :item_id AND user_id = :user_id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    header('Location: enviroment.php');
+    exit;
 }
 ?>
 
@@ -127,24 +131,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="container">
-    <a href="top.php" class="back-button">← 戻る</a>
-        <?php if (!empty($items)): ?>
-            <?php foreach ($items as $item): ?>
-                <div class="upgrade-item">
-                    <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>">
-                    <h3><?= htmlspecialchars($item['item_name']) ?></h3>
-                    <p>効果: <?= htmlspecialchars($item['effect']) ?></p>
-                    <p>現在の価格: <?= htmlspecialchars($item['price']) ?>c</p>
-                    <p>現在のレベル: <?= htmlspecialchars($item['level']) ?></p>
-                    <form method="POST">
-                        <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
+        <a href="top.php" class="back-button">← 戻る</a>
+        <?php foreach ($items as $item): ?>
+            <div class="upgrade-item">
+                <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>">
+                <h3><?= htmlspecialchars($item['item_name']) ?></h3>
+                <p>効果: <?= htmlspecialchars($item['effect']) ?></p>
+                <p>現在の価格: <?= htmlspecialchars($item['price']) ?>c</p>
+                <p>現在のレベル: <?= htmlspecialchars($item['level']) ?></p>
+                <form method="POST">
+                    <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
+                    <?php if ($item['item_name'] === 'バナー広告消去権' && $hasAdRemoval): ?>
+                        <button class="upgrade-button" disabled>永久購入済み</button>
+                    <?php else: ?>
                         <button class="upgrade-button">レベルアップ</button>
-                    </form>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>アイテムが見つかりません。</p>
-        <?php endif; ?>
+                    <?php endif; ?>
+                </form>
+            </div>
+        <?php endforeach; ?>
     </div>
 </body>
 </html>
