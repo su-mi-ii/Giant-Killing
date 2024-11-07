@@ -26,15 +26,17 @@
 
         .back-button {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 30px;
-            background-color: white;
-            border-radius: 50%;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            top: 40px;
+            left: 30px;
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
-
         h2 {
             font-size: 24px;
             margin-bottom: 20px;
@@ -103,11 +105,11 @@
     </style>
 </head>
 <body>
-
-    <div class="settings-container">
-        <div class="back-button">
-            <a href="top.php">←</a>
+<div class="back-button">
+            <a href="top.php">←戻る</a>
         </div>
+    <div class="settings-container">
+        
 
         <h2>サウンド</h2>
 
@@ -145,18 +147,19 @@
 
 
     <script>
-        const bgmAudio = document.getElementById('bgm-audio');
+        // 初期音量を10%に設定
+const bgmAudio = document.getElementById('bgm-audio');
+bgmAudio.volume = 0.1; // 10%
 
-        const bgmVolumeSlider = document.getElementById('bgm-volume');
-        const bgmValueLabel = document.getElementById('bgm-value');
+const bgmVolumeSlider = document.getElementById('bgm-volume');
+const bgmValueLabel = document.getElementById('bgm-value');
 
-        bgmAudio.volume = bgmVolumeSlider.value / 100;
+bgmVolumeSlider.addEventListener('input', function() {
+    const volume = bgmVolumeSlider.value;
+    bgmValueLabel.textContent = volume;
+    bgmAudio.volume = volume / 100;
+});
 
-        bgmVolumeSlider.addEventListener('input', function() {
-            const volume = bgmVolumeSlider.value;
-            bgmValueLabel.textContent = volume;
-            bgmAudio.volume = volume / 100;
-        });
 
         const bgmTitle = document.getElementById('bgm-title');
         const bgmTracks = [
