@@ -33,7 +33,7 @@ if ($entry_id === null) {
 
 // zukanとcharactersテーブルからキャラクターの詳細を取得
 $sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name, zukan.character_description, characters.rarity 
-        FROM zukan 
+        FROM zukan
         JOIN characters ON zukan.character_id = characters.character_id
         WHERE zukan.entry_id = ?";
 $stmt = $conn->prepare($sql);
@@ -147,13 +147,14 @@ $conn->close(); // 接続を閉じる
             position: absolute;
             top: 20px;
             left: 20px;
-            font-size: 30px;
-            background-color: white;
-            border-radius: 50%;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
             text-decoration: none;
-            color: #333;
+            transition: background-color 0.3s;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
 
         a {
@@ -197,9 +198,8 @@ $conn->close(); // 接続を閉じる
 </head>
 <body>
 
-<div class="back-button">
-    <a href="zukan.php">←</a>
-</div>
+<a href="top.php" class="back-button">← 戻る</a>
+
 
 <div class="detail-container">
     <h1><?php echo htmlspecialchars($character['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
