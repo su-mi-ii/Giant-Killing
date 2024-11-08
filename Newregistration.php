@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 INSERT INTO zukan (character_id, user_id, character_image, character_description)
                 VALUES
                 (1, :user_id, 'image/☆１寝顔.png', '寝ることが得意。気が付いたら作業から目を背けている'),
-                (2, :user_id, 'image/☆１シンプル南.gif', '無口でシンプルな性格だが、心には深い情熱を秘めている...'),
+                (2, :user_id, 'image/☆１シンプル南１.gif', '無口でシンプルな性格だが、心には深い情熱を秘めている...'),
                 (3, :user_id, 'image/☆１ダークサイド.png', 'なぜ闇落ちしたのかは不明。必殺技はドラゴブラスター'),
                 (4, :user_id, 'image/☆１南バズ.png', '南の地から来た冒険者。楽観的な性格で、いつも元気な声で周囲を盛り上げる'),
                 (5, :user_id, 'image/☆１頭.gif', 'その頭の大きさに反して、抜群のバランス感覚を持つ。知識にあふれ、パズルや戦術的な戦いを得意とする'),
