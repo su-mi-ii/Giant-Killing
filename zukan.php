@@ -6,22 +6,22 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
- 
+
 $user_id = $_SESSION['user_id'];
- 
+
 $servername = "mysql311.phy.lolipop.lan";
 $username = "LAA1517492";
 $password = "Pass0313"; // 実際のパスワードに置き換えてください
 $dbname = "LAA1517492-giants";
- 
+
 $conn = new mysqli($servername, $username, $password, $dbname);
- 
+
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
- 
-$sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name
-        FROM zukan
+
+$sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name 
+        FROM zukan 
         JOIN characters ON zukan.character_id = characters.character_id
         WHERE zukan.user_id = ?";
 $stmt = $conn->prepare($sql);
@@ -54,6 +54,10 @@ $result = $stmt->get_result();
             background-color: #a37934;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #fff;
         }
  
         h1 {
@@ -112,13 +116,11 @@ $result = $stmt->get_result();
             transition: background-color 0.3s;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
- 
         @media (max-width: 768px) {
             .card {
                 flex-basis: calc(50% - 30px); /* タブレット用 */
             }
         }
- 
         @media (max-width: 480px) {
             .card {
                 flex-basis: calc(100% - 30px); /* モバイル用 */
@@ -127,9 +129,9 @@ $result = $stmt->get_result();
     </style>
 </head>
 <body>
- 
+
 <a href="top.php" class="back-button">← 戻る</a>
- 
+
 <div class="container">
     <h1>図鑑</h1>
     <div class="grid">
