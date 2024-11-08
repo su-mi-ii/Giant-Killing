@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             (:user_id, 'カビ治療薬', 3000, 'カビが生えなくなる', 'image/kabi.png', 1),
             (:user_id, '生命維持装置', 1500, '人間の生命を維持できる', 'image/seimei.png', 1),
             (:user_id, 'レアアップ像', 2000, 'レアの確率を上げる', 'image/zou.png', 1),
-            (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png', 1)
+            (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png', 0)
             ";
             $item_stmt = $pdo->prepare($item_sql);
             $item_stmt->bindParam(':user_id', $user_id);
