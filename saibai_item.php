@@ -2,27 +2,33 @@
 require 'db-connect.php';
 session_start(); // セッションを開始
 
-// ログインしているユーザーのIDを取得
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+// ログインユーザー情報
+$user_id = $_SESSION['user_id'];
 
-    // ユーザーごとの道具情報を取得
-    $sql = "SELECT tool_id, tool_name, price, effect, tool_image, level 
-            FROM tools WHERE user_id = :user_id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $tools = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} else {
-    echo 'ログインが必要です。';
-    exit;
-}
+// 所持金を取得
+$sql = "SELECT money FROM users WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$totalMoney = $user['money'] ?? 0;
+$_SESSION['total_money'] = $totalMoney;
 
-// レベルアップ処理
+// 道具情報を取得
+$sql = "SELECT tool_id, tool_name, price, effect, tool_image, level FROM tools WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$tools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// エラーメッセージを保持
+$errorMessages = [];
+
+// 購入処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tool_id = $_POST['tool_id'];
 
-    // 現在の価格とレベルを取得
+    // 選択した道具情報を取得
     $sql = "SELECT price, level FROM tools WHERE tool_id = :tool_id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
@@ -30,23 +36,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $tool = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($tool) {
-        // 価格を1.5倍にしてレベルを+1する
-        $new_price = ceil($tool['price'] * 1.5); // 価格を切り上げ
-        $new_level = $tool['level'] + 1;
-
-        // データベースを更新
-        $sql = "UPDATE tools SET price = :new_price, level = :new_level 
-                WHERE tool_id = :tool_id AND user_id = :user_id";
+    if ($tool && $totalMoney >= $tool['price']) {
+        // 所持金を更新
+        $newMoney = $totalMoney - $tool['price'];
+        $sql = "UPDATE users SET money = :newMoney WHERE user_id = :user_id";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':new_price', $new_price, PDO::PARAM_INT);
-        $stmt->bindParam(':new_level', $new_level, PDO::PARAM_INT);
+        $stmt->bindParam(':newMoney', $newMoney, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // 道具のレベルと価格を更新
+        $newLevel = $tool['level'] + 1;
+        $newPrice = ceil($tool['price'] * 1.5);
+        $sql = "UPDATE tools SET level = :newLevel, price = :newPrice WHERE tool_id = :tool_id AND user_id = :user_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':newLevel', $newLevel, PDO::PARAM_INT);
+        $stmt->bindParam(':newPrice', $newPrice, PDO::PARAM_INT);
         $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->execute();
 
-        header('Location: saibai_item.php'); // ページを再読み込み
+        $_SESSION['total_money'] = $newMoney;
+        header('Location: saibai_item.php');
         exit;
+    } else {
+        // 所持金が不足している場合
+        $errorMessages[$tool_id] = "所持金が不足しています。";
     }
 }
 ?>
@@ -60,12 +75,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background: linear-gradient(to bottom, #f5f7fa, #c3cfe2);
+            background: #8B4513;
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
+        }
+
+        .wallet-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #ffcf33;
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            z-index: 10;
+        }
+
+        .wallet-container img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
         }
 
         .container {
@@ -80,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             width: 80%;
             max-width: 1000px;
+            margin-top: 80px;
         }
 
         .upgrade-item {
@@ -138,42 +174,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: translateY(-2px);
         }
 
-        .exit-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
+        .error-message {
+            color: red;
+            font-size: 0.8rem;
+            margin-top: 5px;
         }
 
-        .exit-button img {
-            width: 40px;
-            height: auto;
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 8px 12px;
+            font-size: 1rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background-color: #555;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-    <a href="top.php" class="back-button">← 戻る</a>
-        <?php if (!empty($tools)): ?>
-            <?php foreach ($tools as $tool): ?>
-                <div class="upgrade-item">
-                    <img src="<?= htmlspecialchars($tool['tool_image']) ?>" alt="<?= htmlspecialchars($tool['tool_name']) ?> Icon">
-                    <h3><?= htmlspecialchars($tool['tool_name']) ?></h3>
-                    <p>効果: <?= htmlspecialchars($tool['effect']) ?></p>
-                    <p>現在の価格: <?= htmlspecialchars($tool['price']) ?>c</p>
-                    <p>現在のレベル: <?= htmlspecialchars($tool['level']) ?></p>
-                    <form method="POST">
-                        <input type="hidden" name="tool_id" value="<?= $tool['tool_id'] ?>">
-                        <button class="upgrade-button">レベルアップ</button>
-                    </form>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>このユーザーには道具がありません。</p>
-        <?php endif; ?>
+    <!-- 所持金表示とトップへのリンク -->
+    <a href="top.php" class="back-button">← トップへ戻る</a>
+    <div class="wallet-container">
+        <img src="image/coin_icon.png" alt="Coin Icon"> <!-- アイコンを所持金の横に表示 -->
+        所持金: <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
     </div>
 
+    <div class="container">
+        <?php foreach ($tools as $tool): ?>
+            <div class="upgrade-item">
+                <img src="<?= htmlspecialchars($tool['tool_image']) ?>" alt="<?= htmlspecialchars($tool['tool_name']) ?> Icon">
+                <h3><?= htmlspecialchars($tool['tool_name']) ?></h3>
+                <p>効果: <?= htmlspecialchars($tool['effect']) ?></p>
+                <p>現在の価格: <?= htmlspecialchars($tool['price']) ?>c</p>
+                <p>現在のレベル: <?= htmlspecialchars($tool['level']) ?></p>
+                <form method="POST">
+                    <input type="hidden" name="tool_id" value="<?= $tool['tool_id'] ?>">
+                    <button class="upgrade-button">レベルアップ</button>
+                </form>
+                <?php if (isset($errorMessages[$tool['tool_id']])): ?>
+                    <p class="error-message"><?= $errorMessages[$tool['tool_id']] ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
 </body>
 </html>

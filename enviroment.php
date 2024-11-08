@@ -1,52 +1,72 @@
 <?php
 require 'db-connect.php';
-session_start(); // セッションを開始
+session_start();
 
-// ログインしているユーザーのIDを取得
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+// ログインユーザー情報取得
+$user_id = $_SESSION['user_id'];
 
-    // ユーザーごとのアイテム情報を取得
-    $sql = "SELECT item_id, item_name, price, effect, item_image, level 
-            FROM items WHERE user_id = :user_id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} else {
-    echo 'ログインが必要です。';
-    exit;
-}
+// ユーザーの所持金を取得
+$sql = "SELECT money FROM users WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$totalMoney = $user['money'] ?? 0;
+$_SESSION['total_money'] = $totalMoney;
 
-// レベルアップ処理
+// アイテム情報を取得
+$sql = "SELECT item_id, item_name, price, effect, item_image, level FROM items WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// エラーメッセージをアイテムごとに保持
+$errorMessages = [];
+
+// 購入処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = $_POST['item_id'];
-
-    // 現在の価格とレベルを取得
-    $sql = "SELECT price, level FROM items WHERE item_id = :item_id AND user_id = :user_id";
+    
+    // 選択したアイテム情報を取得
+    $sql = "SELECT price, effect, level FROM items WHERE item_id = :item_id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($item) {
-        // 価格を1.5倍にしてレベルを+1する
-        $new_price = ceil($item['price'] * 1.2); // 価格を切り上げ
-        $new_level = $item['level'] + 1;
-
-        // データベースを更新
-        $sql = "UPDATE items SET price = :new_price, level = :new_level 
-                WHERE item_id = :item_id AND user_id = :user_id";
+    
+    if ($item && $totalMoney >= $item['price']) {
+        // 所持金を更新
+        $newMoney = $totalMoney - $item['price'];
+        $sql = "UPDATE users SET money = :newMoney WHERE user_id = :user_id";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':new_price', $new_price, PDO::PARAM_INT);
-        $stmt->bindParam(':new_level', $new_level, PDO::PARAM_INT);
+        $stmt->bindParam(':newMoney', $newMoney, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        // アイテムのレベルと価格を更新
+        $newLevel = $item['level'] + 1;
+        $newPrice = ceil($item['price'] * 1.2);
+        $sql = "UPDATE items SET level = :newLevel, price = :newPrice WHERE item_id = :item_id AND user_id = :user_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':newLevel', $newLevel, PDO::PARAM_INT);
+        $stmt->bindParam(':newPrice', $newPrice, PDO::PARAM_INT);
         $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->execute();
 
-        header('Location: enviroment.php'); // ページを再読み込み
+        // 成長速度を増加させる例（成長速度に基づいた効果を反映）
+        if ($item['effect'] === '成長速度上昇') {
+            $_SESSION['growth_rate'] = ($_SESSION['growth_rate'] ?? 1) * 1.05; // 5%アップ
+        }
+        
+        $_SESSION['total_money'] = $newMoney;
+        header('Location: enviroment.php');
         exit;
+    } else {
+        // 所持金が不足している場合、エラーメッセージを設定
+        $errorMessages[$item_id] = "所持金が不足しています。";
     }
 }
 ?>
@@ -60,12 +80,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(to bottom, #d0e0f0, #a0b0d0);
+            background: #8B4513; /* 背景色を茶色に */
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
+        }
+
+        .wallet-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #ffcf33;
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            z-index: 10;
+        }
+
+        .wallet-container img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
         }
 
         .container {
@@ -74,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             gap: 50px;
             padding: 40px;
+            margin-top: 80px;
             background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -89,6 +130,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #fff9e0;
             width: 160px;
             text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .upgrade-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
         }
 
         .upgrade-item img {
@@ -118,33 +165,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
         .upgrade-button:hover {
             background-color: #45a049;
         }
+
+        .error-message {
+            color: red;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 8px 12px;
+            font-size: 1rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 <body>
+    <!-- 所持金表示とトップへのリンク -->
+    <a href="top.php" class="back-button">← トップへ戻る</a>
+    <div class="wallet-container">
+        <img src="image/coin_icon.png" alt="Coin Icon"> <!-- アイコンを所持金の横に表示 -->
+        所持金: <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
+    </div>
+
     <div class="container">
-    <a href="top.php" class="back-button">← 戻る</a>
-        <?php if (!empty($items)): ?>
-            <?php foreach ($items as $item): ?>
-                <div class="upgrade-item">
-                    <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>">
-                    <h3><?= htmlspecialchars($item['item_name']) ?></h3>
-                    <p>効果: <?= htmlspecialchars($item['effect']) ?></p>
-                    <p>現在の価格: <?= htmlspecialchars($item['price']) ?>c</p>
-                    <p>現在のレベル: <?= htmlspecialchars($item['level']) ?></p>
-                    <form method="POST">
-                        <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
-                        <button class="upgrade-button">レベルアップ</button>
-                    </form>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>アイテムが見つかりません。</p>
-        <?php endif; ?>
+        <?php foreach ($items as $item): ?>
+            <div class="upgrade-item">
+                <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>">
+                <h3><?= htmlspecialchars($item['item_name']) ?></h3>
+                <p>効果: <?= htmlspecialchars($item['effect']) ?></p>
+                <p>現在の価格: <?= htmlspecialchars($item['price']) ?>c</p>
+                <p>現在のレベル: <?= htmlspecialchars($item['level']) ?></p>
+                <form method="POST">
+                    <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
+                    <button class="upgrade-button">購入</button>
+                </form>
+                <?php if (isset($errorMessages[$item['item_id']])): ?>
+                    <p class="error-message"><?= $errorMessages[$item['item_id']] ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
     </div>
 </body>
 </html>
