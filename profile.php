@@ -17,13 +17,18 @@ $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
 
 $user_name = $user ? $user['user_name'] : 'Unknown User';
 
-// 現在のプロフィールアイコンを取得
-$sql_icon = "SELECT character_image FROM zukan WHERE user_id = ? LIMIT 1";
+// `users` テーブルから現在のプロフィールアイコンを取得
+$sql_icon = "SELECT icon FROM users WHERE user_id = ?";
 $stmt_icon = $pdo->prepare($sql_icon);
 $stmt_icon->execute([$user_id]);
 $icon = $stmt_icon->fetch(PDO::FETCH_ASSOC);
 
-$character_image = $icon ? $icon['character_image'] : 'default_icon.png';
+// デフォルトのアイコン画像
+$default_icon = 'image/☆１シンプル南.png';
+
+// iconが空またはnullの場合はデフォルト画像を使用
+$character_image = !empty($icon['icon']) ? $icon['icon'] : $default_icon;
+
 
 // 収穫情報を取得
 $sql_harvest = "SELECT COUNT(DISTINCT character_id) AS discovered_characters, COUNT(*) AS total_harvest FROM harvest_log WHERE user_id = ?";
@@ -34,12 +39,13 @@ $harvest = $stmt_harvest->fetch(PDO::FETCH_ASSOC);
 $discovered_characters = $harvest['discovered_characters'] ?? 0;
 $total_harvest = $harvest['total_harvest'] ?? 0;
 
-// zukanテーブルから重複しないキャラクター情報を取得
+// `zukan` テーブルから重複しないキャラクター情報を取得
 $sql_characters = "SELECT DISTINCT character_id, character_image FROM zukan WHERE user_id = ?";
 $stmt_characters = $pdo->prepare($sql_characters);
 $stmt_characters->execute([$user_id]);
 $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -51,7 +57,7 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
         body {
             font-family: 'Arial', sans-serif;
             background-color: #d6d6d6;
-            background-image: url('image/aig-ai221017149-xl_TP_V.webp');
+            background-image: url('image/aig-ai221017149-xl_TP_V.png');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -178,7 +184,7 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
             const iconContainer = document.querySelector('.icon-container');
             const characterGrid = document.querySelector('.character-grid');
 
-            let hideTimeout; // 隠すタイマー
+            let hideTimeout;
 
             iconContainer.addEventListener('mouseenter', () => {
                 characterGrid.style.display = 'grid';
@@ -187,15 +193,15 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
             iconContainer.addEventListener('mouseleave', () => {
                 hideTimeout = setTimeout(() => {
                     characterGrid.style.display = 'none';
-                }, 300); // 300ミリ秒の遅延
+                }, 300);
             });
 
             characterGrid.addEventListener('mouseenter', () => {
-                clearTimeout(hideTimeout); // グリッドにマウスが入ったらタイマーをクリア
+                clearTimeout(hideTimeout);
             });
 
             characterGrid.addEventListener('mouseleave', () => {
-                characterGrid.style.display = 'none'; // グリッドが外れたら即時非表示
+                characterGrid.style.display = 'none';
             });
         });
     </script>
