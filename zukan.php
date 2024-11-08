@@ -1,6 +1,6 @@
-<?php 
+<?php
 session_start();
-
+ 
 // ログインしているか確認
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -29,7 +29,7 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
-
+ 
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -45,7 +45,7 @@ $result = $stmt->get_result();
             margin: 0;
             padding: 0;
         }
-
+ 
         .container {
             margin: 20px auto;
             padding: 20px;
@@ -59,13 +59,17 @@ $result = $stmt->get_result();
         h1 {
             color: #fff;
         }
-
+ 
+        h1 {
+            color: #fff;
+        }
+ 
         .grid {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
         }
-
+ 
         .card {
             background-color: white;
             margin: 15px;
@@ -78,12 +82,12 @@ $result = $stmt->get_result();
             box-sizing: border-box;
             position: relative;
         }
-
+ 
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
-
+ 
         .card img {
             width: 100%;
             height: 200px;
@@ -92,13 +96,13 @@ $result = $stmt->get_result();
             background-color: #f4f4f4;
             box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
         }
-
+ 
         .card h3 {
             font-size: 18px;
             margin: 10px 0;
             color: #333;
         }
-
+ 
         .back-button {
             position: absolute;
             top: 40px;
@@ -112,13 +116,11 @@ $result = $stmt->get_result();
             transition: background-color 0.3s;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
-
         @media (max-width: 768px) {
             .card {
                 flex-basis: calc(50% - 30px); /* タブレット用 */
             }
         }
-
         @media (max-width: 480px) {
             .card {
                 flex-basis: calc(100% - 30px); /* モバイル用 */
@@ -150,6 +152,6 @@ $result = $stmt->get_result();
         ?>
     </div>
 </div>
-
+ 
 </body>
 </html>
