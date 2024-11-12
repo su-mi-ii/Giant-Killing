@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             (:user_id, 'カビ治療薬', 4000, 'カビが生えなくなる', 'image/kabi.png', 0),
             (:user_id, '生命維持装置', 4000, '人間の生命を維持できる', 'image/seimei.png', 0),
             (:user_id, 'ウチヤマワールド', 4000, 'ウチヤマワールドをアンロック', 'image/☆１内山.png', 0),
-            (:user_id, 'ディズニーワールド', 4000, 'ディズニーワールドをアンロック', 'image/disney.png', 0),
+            (:user_id, 'ディズニーワールド', 4000, 'ディズニーワールドをアンロック', 'image/ディズニー.png', 0),
             (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png', 0)
             ";
             $item_stmt = $pdo->prepare($item_sql);
