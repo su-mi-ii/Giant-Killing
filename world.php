@@ -1,14 +1,3 @@
-<?php
-require 'db-connect.php';
-
-$sql = "SELECT world_id, world_type FROM world";
-
-$stmt = $pdo->prepare($sql);
-$stmt->execute();
-$worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -16,95 +5,82 @@ $worlds = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ワールド選択</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #fff;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: white; 
+            margin: 0; 
+            padding: 0;
         }
-
-        h1 {
-            margin-bottom: 20px;
-            font-size: 2rem;
-        }
-
-        .container {
-            display: inline-block;
-            border: 2px solid #ccc;
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        .world-option {
+        .container { 
+            margin: 0 auto; 
+            padding: 20px 50px; 
+            width: 100%; 
+            max-width: 600px; 
+            background-color: #996633; 
+            border-radius: 10px; 
+            min-height: 100vh; /* ビューの高さ全体を使用 */
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            margin: 10px 0;
-            background-color: #f0f0f0;
+            justify-content: center;
+            box-sizing: border-box;
         }
-
-        .world-option img {
-            width: 50px;
-            height: auto;
+        .world-option { 
+            display: flex; 
+            align-items: center; 
+            background-color: white; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            width: 100%; 
+            box-sizing: border-box;
+            text-decoration: none; /* リンクの下線を削除 */
+            color: #333; /* テキストカラー */
+            transition: background-color 0.3s; /* ホバー効果 */
         }
-
+        .world-option:hover {
+            background-color: #f0f0f0; /* ホバー時の背景色 */
+        }
+        .world-option img { 
+            width: 100px; /* 画像の幅を調整 */
+            height: 100px; /* 画像の高さを調整 */
+            margin-right: 15px;
+        }
         .back-button {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
+            top: 40px;
+            left: 60px;
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
-
-        .navigation-buttons {
-            margin-top: 20px;
-        }
-
-        .nav-button {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 2rem;
-        }
-
-        .nav-button img {
-            width: 200px;
-            height: auto;
-        }
-
     </style>
 </head>
 <body>
 
-    <button class="back-button">戻る</button>
-
+<div class="container">
+    <a href="top.php" class="back-button">← 戻る</a>
     <h1>ワールド選択</h1>
 
-    <div class="container">
-        <?php foreach ($worlds as $world): ?>
-            <div class="world-option">
-                <span><?= htmlspecialchars($world['world_name']) ?></span>
-                <img src="<?= htmlspecialchars($world['world_image']) ?>" alt="<?= htmlspecialchars($world['world_name']) ?>">
-            </div>
-        <?php endforeach; ?>
-    </div>
-
-    <div class="navigation-buttons">
-        <button class="nav-button">
-            <img src="image/haripota.png" alt="ハリポタ">
-        </button>
-        <br>
-        <br>
-        <button class="nav-button">
-            <img src="image/fantastic.png" alt="ファンタスティック">
-        </button>
-    </div>
+    <a href="select_world.php?world=haripota" class="world-option">
+        <img src="image/haripota.png" alt="ハリポタワールド">
+        <span>ハリポタワールド</span>
+    </a>
+    <a href="select_world.php?world=fantastic" class="world-option">
+        <img src="image/fantastic.png" alt="ファンタスティックワールド">
+        <span>ファンタスティックワールド</span>
+    </a>
+    <a href="select_world.php?world=miyamoto" class="world-option">
+        <img src="image/☆１ダークサイド.png" alt="ミヤモトワールド">
+        <span>☆ミヤモトワールド☆</span>
+    </a>
+</div>
 
 </body>
 </html>
