@@ -68,11 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $item_sql = "
             INSERT INTO items (user_id, item_name, price, effect, item_image, level)
             VALUES
-            (:user_id, '栄養剤', 200, '成長速度上昇', 'image/eiyo.png', 1),
-            (:user_id, 'レア薬', 500, 'レアが多く生える', 'image/rea.png', 1),
-            (:user_id, 'カビ治療薬', 3000, 'カビが生えなくなる', 'image/kabi.png', 1),
-            (:user_id, '生命維持装置', 1500, '人間の生命を維持できる', 'image/seimei.png', 1),
-            (:user_id, 'レアアップ像', 2000, 'レアの確率を上げる', 'image/zou.png', 1),
+            (:user_id, '栄養剤', 5000, '成長速度上昇', 'image/eiyo.png', 0),
+            (:user_id, 'レア薬', 6000, 'レアが多く生える', 'image/rea.png', 0),
+            (:user_id, 'カビ治療薬', 4000, 'カビが生えなくなる', 'image/kabi.png', 0),
+            (:user_id, '生命維持装置', 4000, '人間の生命を維持できる', 'image/seimei.png', 0),
+            (:user_id, 'ウチヤマワールド', 4000, 'ウチヤマワールドをアンロック', 'image/☆１内山.png', 0),
+            (:user_id, 'ディズニーワールド', 4000, 'ディズニーワールドをアンロック', 'image/ディズニー.png', 0),
             (:user_id, 'バナー広告消去権', 3000, 'バナー広告が表示されなくなる', 'image/koukoku.png', 0)
             ";
             $item_stmt = $pdo->prepare($item_sql);
