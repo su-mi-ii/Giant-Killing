@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if ($item && $totalMoney >= $item['price']) {
+    if ($item && $totalMoney >= $item['price'] && $item['level'] == 0) {
         // 所持金を更新
         $newMoney = $totalMoney - $item['price'];
         $sql = "UPDATE users SET money = :newMoney WHERE user_id = :user_id";
@@ -45,18 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->execute();
         
-        // アイテムのレベルと価格を更新
-        $newLevel = $item['level'] + 1;
-        $newPrice = ceil($item['price'] * 1.2);
-        $sql = "UPDATE items SET level = :newLevel, price = :newPrice WHERE item_id = :item_id AND user_id = :user_id";
+        // アイテムのレベルを1（購入済み）に更新
+        $sql = "UPDATE items SET level = 1 WHERE item_id = :item_id AND user_id = :user_id";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':newLevel', $newLevel, PDO::PARAM_INT);
-        $stmt->bindParam(':newPrice', $newPrice, PDO::PARAM_INT);
         $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->execute();
 
-        // 成長速度を増加させる例（成長速度に基づいた効果を反映）
+        // 成長速度の効果を反映する例
         if ($item['effect'] === '成長速度上昇') {
             $_SESSION['growth_rate'] = ($_SESSION['growth_rate'] ?? 1) * 1.05; // 5%アップ
         }
@@ -64,13 +60,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['total_money'] = $newMoney;
         header('Location: enviroment.php');
         exit;
+    } elseif ($item['level'] > 0) {
+        // 購入済みの場合のエラーメッセージ
+        $errorMessages[$item_id] = "このアイテムはすでに購入済みです。";
     } else {
-        // 所持金が不足している場合、エラーメッセージを設定
+        // 所持金が不足している場合
         $errorMessages[$item_id] = "所持金が不足しています。";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -99,6 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1.2rem;
             font-weight: bold;
             color: #333;
+            display: flex;
+            align-items: center; /* テキストとアイコンを垂直方向に中央揃え */
             z-index: 10;
         }
 
@@ -106,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 24px;
             height: 24px;
             margin-right: 8px;
+            vertical-align: middle; /* アイコンをテキストと中央揃え */
         }
 
         .container {
@@ -199,11 +200,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-<body>
-    <!-- 所持金表示とトップへのリンク -->
-    <a href="top.php" class="back-button">← トップへ戻る</a>
+<a href="top.php" class="back-button">← トップへ戻る</a>
     <div class="wallet-container">
-        <img src="image/coin_icon.png" alt="Coin Icon"> <!-- アイコンを所持金の横に表示 -->
+        <img src="image/coin_kinoko.png" alt="Coin Icon"> <!-- アイコンを所持金の横に表示 -->
         所持金: <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
     </div>
 
@@ -213,14 +212,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <img src="<?= htmlspecialchars($item['item_image']) ?>" alt="<?= htmlspecialchars($item['item_name']) ?>">
                 <h3><?= htmlspecialchars($item['item_name']) ?></h3>
                 <p>効果: <?= htmlspecialchars($item['effect']) ?></p>
-                <p>現在の価格: <?= htmlspecialchars($item['price']) ?>c</p>
-                <p>現在のレベル: <?= htmlspecialchars($item['level']) ?></p>
-                <form method="POST">
-                    <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
-                    <button class="upgrade-button">購入</button>
-                </form>
-                <?php if (isset($errorMessages[$item['item_id']])): ?>
-                    <p class="error-message"><?= $errorMessages[$item['item_id']] ?></p>
+                <p>価格: <?= htmlspecialchars($item['price']) ?>c</p>
+                <?php if ($item['level'] > 0): ?>
+                    <!-- 購入済みのメッセージ表示 -->
+                    <p>このアイテムは購入済みです。</p>
+                <?php else: ?>
+                    <form method="POST">
+                        <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
+                        <button class="upgrade-button">購入</button>
+                    </form>
+                    <?php if (isset($errorMessages[$item['item_id']])): ?>
+                        <p class="error-message"><?= $errorMessages[$item['item_id']] ?></p>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
