@@ -105,12 +105,13 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .icon-image {
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            transition: transform 0.3s ease-in-out;
-        }
+    border-radius: 50%;
+    width: 200px; /* 100px → 200px */
+    height: 200px; /* 100px → 200px */
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
 
         .icon-image:hover {
             transform: scale(1.1);
