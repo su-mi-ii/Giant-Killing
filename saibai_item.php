@@ -29,42 +29,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tool_id = $_POST['tool_id'];
 
     // 選択した道具情報を取得
-    $sql = "SELECT price, level FROM tools WHERE tool_id = :tool_id AND user_id = :user_id";
+    $sql = "SELECT price, level, effect FROM tools WHERE tool_id = :tool_id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
     $tool = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($tool && $totalMoney >= $tool['price']) {
-        // 所持金を更新
-        $newMoney = $totalMoney - $tool['price'];
-        $sql = "UPDATE users SET money = :newMoney WHERE user_id = :user_id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':newMoney', $newMoney, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->execute();
+    if ($tool) {
+        if ($tool['level'] >= 10) {
+            // レベルが10以上の場合はエラーメッセージを設定
+            $errorMessages[$tool_id] = "これ以上レベルを上げることができません。";
+        } elseif ($totalMoney >= $tool['price']) {
+            // 所持金を更新
+            $newMoney = $totalMoney - $tool['price'];
+            $sql = "UPDATE users SET money = :newMoney WHERE user_id = :user_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':newMoney', $newMoney, PDO::PARAM_INT);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
 
-        // 道具のレベルと価格を更新
-        $newLevel = $tool['level'] + 1;
-        $newPrice = ceil($tool['price'] * 1.5);
-        $sql = "UPDATE tools SET level = :newLevel, price = :newPrice WHERE tool_id = :tool_id AND user_id = :user_id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':newLevel', $newLevel, PDO::PARAM_INT);
-        $stmt->bindParam(':newPrice', $newPrice, PDO::PARAM_INT);
-        $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->execute();
+            // 道具のレベルと価格を更新
+            $newLevel = $tool['level'] + 1;
+            $newPrice = ceil($tool['price'] * 1.5);
+            $sql = "UPDATE tools SET level = :newLevel, price = :newPrice WHERE tool_id = :tool_id AND user_id = :user_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':newLevel', $newLevel, PDO::PARAM_INT);
+            $stmt->bindParam(':newPrice', $newPrice, PDO::PARAM_INT);
+            $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
 
-        $_SESSION['total_money'] = $newMoney;
-        header('Location: saibai_item.php');
-        exit;
-    } else {
-        // 所持金が不足している場合
-        $errorMessages[$tool_id] = "所持金が不足しています。";
+            // 出現速度の更新（1.1倍ごとに増加）
+            if ($tool['effect'] === '発生速度上昇') {
+                $appearanceRate = 1 + (0.1 * $newLevel); // レベルに応じて0.1倍ずつ増加
+                $_SESSION['appearance_rate'] = min($appearanceRate, 2.0); // 最大2.0倍まで制限
+            }
+
+            // セッションの所持金の値を更新
+            $_SESSION['total_money'] = $newMoney;
+
+            // リダイレクトしてリフレッシュ
+            header('Location: saibai_item.php');
+            exit;
+        } else {
+            // 所持金が不足している場合
+            $errorMessages[$tool_id] = "所持金が不足しています。";
+        }
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ja">
