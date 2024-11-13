@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = $_POST['item_id'];
     
     // 選択したアイテム情報を取得
-    $sql = "SELECT price, effect, level FROM items WHERE item_id = :item_id AND user_id = :user_id";
+    $sql = "SELECT price, effect, level, item_name FROM items WHERE item_id = :item_id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
@@ -56,6 +56,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($item['effect'] === '成長速度上昇') {
             $_SESSION['growth_rate'] = ($_SESSION['growth_rate'] ?? 1) * 1.05; // 5%アップ
         }
+
+        // 特定アイテム購入時にワールドアンロック
+        if ($item['item_name'] === 'ウチヤマワールド' || $item['item_name'] === 'ディズニーワールド') {
+            $world_type = ($item['item_name'] === 'ウチヤマワールド') ? 'utiyama' : 'disney';
+            
+            // ユーザーがすでにこのワールドを持っているか確認
+            $check_world_sql = "SELECT COUNT(*) FROM world WHERE user_id = :user_id AND world_type = :world_type";
+            $check_stmt = $pdo->prepare($check_world_sql);
+            $check_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $check_stmt->bindParam(':world_type', $world_type);
+            $check_stmt->execute();
+            $world_exists = $check_stmt->fetchColumn();
+
+            // ワールドが未登録の場合のみ追加
+            if (!$world_exists) {
+                $world_sql = "INSERT INTO world (user_id, world_type) VALUES (:user_id, :world_type)";
+                $world_stmt = $pdo->prepare($world_sql);
+                $world_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+                $world_stmt->bindParam(':world_type', $world_type);
+                $world_stmt->execute();
+            }
+        }
         
         $_SESSION['total_money'] = $newMoney;
         header('Location: enviroment.php');
@@ -68,7 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessages[$item_id] = "所持金が不足しています。";
     }
 }
+
 ?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
