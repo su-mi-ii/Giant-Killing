@@ -32,12 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // クッキーにユーザーIDを保存（例: 30日間有効）
             setcookie('user_id', $user_id, time() + (30 * 24 * 60 * 60), '/', '', false, true);
 
-             // デフォルトワールドを割り当てる
-             $default_world_sql = "INSERT INTO world (user_id, world_type) VALUES (:user_id, 'default')";
-             $default_world_stmt = $pdo->prepare($default_world_sql);
-             $default_world_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-             $default_world_stmt->execute();
-
             // 図鑑データの挿入
             $zukan_sql = "
                 INSERT INTO zukan (character_id, user_id, character_image, character_description)
