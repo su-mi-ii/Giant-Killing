@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             text-align: center;
-            background-image: url('image/gensou.webp');
+            background-image: url('image/☆１内山.png');
             background-size: cover; /* 全画面に拡大 */
             background-position: center;
         }
