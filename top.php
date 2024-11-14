@@ -142,15 +142,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* pointbox-image（右側の画像群）の位置調整は既存のままで問題ありません */
             .pointbox-image {
-                float: right;
-                position: relative;
+                position: absolute;
+                right: 20px;
+                top: 0px; 
                 z-index: 10;
                 margin-left: auto;
                 margin-right: 30px;
                 top: 80px;
             }
+
             .wallet-container {
-                position: fixed;
+                position: absolute;
                 top: 20px;
                 right: 20px;
                 background-color: #ffcf33; /* 背景色を黄色に設定 */
@@ -172,10 +174,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     vertical-align: middle; /* アイコンをテキストと中央揃え */
                 }
 
-            .shoumei {
+            .taiyou1-image {
                 position: absolute;
                 left: 300px;
                 top: 0px; 
+                z-index: 10;
+            }
+
+        
+            .takibi-image {
+                position: absolute;
+                left: 200px;
+                bottom: 20px; 
+                z-index: 10; 
+            }
+
+            .spring-image{
+                position: absolute;
+                right: 200px;
+                bottom: 20px; 
                 z-index: 10;
             }
 
@@ -244,8 +261,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="world.php"><img src="image/world.webp" alt="世界" ></a>
     </div>
 
-    <div class="shoumei">
-    <img src="image/shoumei" alt="灯" width="150" height="200"></a>
+    <div class="taiyou-image">
+    <img src="image/taiyou1" alt="灯"  width="100"; height="100";>
     </div>
 
     <div class="pointbox-image">
@@ -257,6 +274,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- なめこコンテナ -->
     <div id="nameko-container">
         <div class="log"></div>
+    </div>
+
+    <div class="spring-image">
+    <img src="image/spring1.webp" alt="灯" width="100" height="100">
+    </div>
+
+    <div class="takibi-image">
+    <img src="image/takibi1.webp" alt="灯" width="100" height="100">
     </div>
 
     <div id="container">
@@ -340,7 +365,7 @@ function displayNamekos() {
     const containerWidth = namekoContainer.offsetWidth;
     const logHeight = window.innerHeight * 0.8;
     const totalColumns = 14;
-    const offsetY = 150; // 位置を下げるオフセット（px単位）
+    const offsetY = 100; // 位置を下げるオフセット（px単位）
 
     namekos.forEach((nameko, index) => {
         const namekoElement = document.createElement('span');
