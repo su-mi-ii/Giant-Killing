@@ -112,6 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>新規登録</title>
     <style>
     /* リセットスタイル */
+/* Reset styles */
+/* Reset styles */
 * {
     margin: 0;
     padding: 0;
@@ -119,19 +121,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: url('image/nojyo.png') no-repeat center center fixed;
+    background-size: cover;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    color: #444;
 }
 
 .container {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: rgba(245, 255, 245, 0.9); /* Light greenish-cream background */
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     width: 100%;
     text-align: center;
@@ -139,67 +143,77 @@ body {
 
 h1 {
     font-size: 24px;
+    font-weight: 600;
     margin-bottom: 20px;
-    color: #333;
+    color: #4a7c59; /* Dark green for headers */
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 form {
-    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 label {
-    display: block;
-    margin-bottom: 8px;
     font-size: 14px;
-    color: #555;
+    color: #6b8c6e;
+    margin-bottom: 5px;
+    align-self: flex-start;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"],
+input[type="password"] {
     width: 100%;
-    padding: 10px;
+    padding: 10px 15px;
     margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: none;
+    border-bottom: 1px solid #8ebf8d; /* Soft green border */
+    background: transparent;
     font-size: 16px;
+    color: #444;
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+    color: #a5c9a1; /* Light green for placeholders */
 }
 
 button {
     width: 100%;
-    padding: 12px;
-    background-color: #4CAF50;
-    border: none;
-    border-radius: 4px;
-    color: white;
+    padding: 10px;
+    background-color: transparent;
+    border: 2px solid #4a7c59; /* Dark green border */
+    border-radius: 25px;
+    color: #4a7c59;
     font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    margin-bottom: 10px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #4a7c59;
+    color: #ffffff;
 }
 
 p {
-    font-size: 14px;
-    color: red;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-button[type="submit"] {
-    background-color: #4CAF50;
-}
-
-button[type="submit"]:hover {
-    background-color: #45a049;
+    font-size: 13px;
+    color: #e74c3c;
+    margin-top: 15px;
 }
 
 button[type="button"] {
-    background-color: #555;
+    background-color: transparent;
+    border-color: #6b8c6e;
+    color: #6b8c6e;
 }
 
 button[type="button"]:hover {
-    background-color: #333;
+    background-color: #6b8c6e;
+    color: #ffffff;
 }
 
         </style>
@@ -215,6 +229,7 @@ button[type="button"]:hover {
             <?php if (isset($error_message)) { echo '<p>' . htmlspecialchars($error_message) . '</p>'; } ?>
             <button type="submit">登録</button>
         </form>
+        <br>
         <form action="menu.php">
     <button type="button" onclick="window.location.href='menu.php';">戻る</button>
 </form>
