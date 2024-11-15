@@ -176,7 +176,7 @@ session_start();
     <div class="container-wrapper">
         <div class="container"><br><br>
             <button onclick="location.href='battle_1.php'">スタート</button><br><br>
-            <button onclick="location.href='omiai.php'">編成画面</button>
+            <button onclick="location.href='hensei.php'">編成画面</button>
             <div class="conta">
                 <button id="toggleButton">このゲームについて▽</button>
                 <div id="slideContainer" class="slide-container">
