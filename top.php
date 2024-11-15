@@ -1,6 +1,6 @@
-<?php
-require 'db-connect.php';
-session_start(); // セッションを開始
+<?php 
+require 'db-connect.php'; 
+session_start(); 
 
 // ユーザーIDの取得
 $user_id = $_SESSION['user_id'] ?? null;
@@ -11,7 +11,7 @@ if (!$user_id) {
 
 // キャラクター情報を取得
 try {
-    $sql = "SELECT name, rarity, character_image, point FROM characters";
+    $sql = "SELECT name, rarity, character_image, point FROM characters WHERE rarity IN (1, 2)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -22,22 +22,36 @@ try {
 
 // データベースからユーザーの所持金を取得し、セッションに保存
 try {
-    $sql = "SELECT money FROM users WHERE user_id = :user_id";
+    $sql = "SELECT money, rare_drug_purchased FROM users WHERE user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     $totalMoney = $user['money'] ?? 0;
-    $_SESSION['total_money'] = $totalMoney; // セッションに所持金を保存
+    $_SESSION['total_money'] = $totalMoney; 
+    $rareDrugPurchased = $user['rare_drug_purchased'] ?? false;
 } catch (PDOException $e) {
     echo '所持金データの取得エラー: ' . htmlspecialchars($e->getMessage());
     exit;
 }
 
+// レア薬購入後、レア度1～5までのキャラクターを成長対象にする
+if ($rareDrugPurchased) {
+    try {
+        $sql = "SELECT name, rarity, character_image, point FROM characters";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo 'データ取得エラー: ' . htmlspecialchars($e->getMessage());
+        exit;
+    }
+}
+
 // 収穫時の処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $characterName = $_POST['name'] ?? '';
-    $characterPoint = (int)($_POST['point'] ?? 0); // 収穫したキャラクターのポイント
+    $characterPoint = (int)($_POST['point'] ?? 0);
 
     try {
         // 現在の所持金を再取得
@@ -68,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // セッションにも新しい所持金を保存
         $_SESSION['total_money'] = $newMoney;
-        echo $newMoney; // 新しい所持金を返す
+        echo $newMoney;
     } catch (PDOException $e) {
         echo 'エラー: ' . htmlspecialchars($e->getMessage());
     }
@@ -298,116 +312,138 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     <script>
-        let isVisible = false;
-document.getElementById('main-button').addEventListener('click', function() {
-    isVisible = !isVisible;
-    togglePopups(isVisible);
-});
+    let isVisible = false;
+    document.getElementById('main-button').addEventListener('click', function() {
+        isVisible = !isVisible;
+        togglePopups(isVisible);
+    });
 
-function togglePopups(show) {
-    const popups = document.querySelectorAll('.popup');
-    popups.forEach(popup => popup.style.display = show ? 'block' : 'none');
-}
-
-function navigateTo(page) {
-    window.location.href = page;
-}
-
-// PHPからキャラクター情報を取得
-const characters = <?php echo json_encode($characters, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-let namekos = [];
-const maxNamekos = 24;
-const growthTime = 5000;
-
-// ページを離れる前にnamekosを保存
-window.addEventListener('beforeunload', function() {
-    localStorage.setItem('namekos', JSON.stringify(namekos));
-});
-
-// ページ読み込み時にnamekosを復元
-window.addEventListener('load', function() {
-    const savedNamekos = localStorage.getItem('namekos');
-    if (savedNamekos) {
-        namekos = JSON.parse(savedNamekos);
-        displayNamekos();
+    function togglePopups(show) {
+        const popups = document.querySelectorAll('.popup');
+        popups.forEach(popup => popup.style.display = show ? 'block' : 'none');
     }
-});
 
-// なめこを成長させる関数
-function growNameko() {
-    if (namekos.length < maxNamekos) {
-        setTimeout(() => {
+    function navigateTo(page) {
+        window.location.href = page;
+    }
+
+    // PHPから変数をJavaScriptに渡す
+    const rareDrugPurchased = <?php echo json_encode($rareDrugPurchased); ?>;
+    const userId = <?php echo json_encode($user_id); ?>;  // 現在のユーザーID
+
+    // キャラクター情報
+    const characters = <?php echo json_encode($characters, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    let namekos = [];
+    const maxNamekos = 24;
+    const growthTime = 5000;
+    let growthInterval;
+
+    // ローカルストレージから保存されたキャラクターを復元（ユーザーごとに管理）
+    function loadNamekos() {
+        const savedNamekos = localStorage.getItem(`namekos_${userId}`);
+        if (savedNamekos) {
+            namekos = JSON.parse(savedNamekos);
+        }
+    }
+
+    // キャラクター生成関数
+    function getRandomCharacter() {
+        const filteredCharacters = characters.filter(character => {
+            return rareDrugPurchased ? character.rarity >= 1 && character.rarity <= 5 : character.rarity <= 2;
+        });
+
+        const totalRarity = filteredCharacters.reduce((sum, char) => sum + (6 - char.rarity), 0);
+        const randomValue = Math.random() * totalRarity;
+        let cumulativeRarity = 0;
+
+        for (const character of filteredCharacters) {
+            cumulativeRarity += (6 - character.rarity);
+            if (randomValue < cumulativeRarity) {
+                return character;
+            }
+        }
+        return filteredCharacters[0];
+    }
+
+    // なめこを成長させる関数
+    function growNameko() {
+        if (namekos.length < maxNamekos) {
             namekos.push(getRandomCharacter());
             displayNamekos();
-        }, growthTime);
-    }
-}
-
-function getRandomCharacter() {
-    const probabilities = characters.map(character => 1 / character.rarity);
-    const totalProbability = probabilities.reduce((sum, prob) => sum + prob, 0);
-    const normalizedProbabilities = probabilities.map(prob => prob / totalProbability);
-    const randomValue = Math.random();
-    let cumulativeProbability = 0;
-
-    for (let i = 0; i < normalizedProbabilities.length; i++) {
-        cumulativeProbability += normalizedProbabilities[i];
-        if (randomValue < cumulativeProbability) return characters[i];
-    }
-    return characters[0];
-}
-
-setInterval(growNameko, growthTime + 1000);
-
-function displayNamekos() {
-    const namekoContainer = document.getElementById('nameko-container');
-    namekoContainer.innerHTML = '<div class="log"></div>';
-    const containerWidth = namekoContainer.offsetWidth;
-    const logHeight = window.innerHeight * 0.8;
-    const totalColumns = 14;
-    const offsetY = 100; // 位置を下げるオフセット（px単位）
-
-    namekos.forEach((nameko, index) => {
-        const namekoElement = document.createElement('span');
-        const imgElement = document.createElement('img');
-        imgElement.src = nameko.character_image;
-        imgElement.alt = nameko.name;
-        imgElement.title = `${nameko.name} - ${nameko.rarity}`;
-        imgElement.style.width = '80px';
-        imgElement.style.height = '80px';
-        namekoElement.appendChild(imgElement);
-        namekoElement.addEventListener('click', () => harvestNameko(index));
-
-        const xPosition = (index % totalColumns) * (containerWidth / (totalColumns + 2));
-        const yPosition = logHeight - (100 * Math.floor(index / totalColumns)) - offsetY;
-        namekoElement.style.left = `${xPosition}px`;
-        namekoElement.style.bottom = `${yPosition}px`;
-        namekoElement.style.position = 'absolute';
-        namekoContainer.appendChild(namekoElement);
-    });
-}
-
-// なめこを収穫
-function harvestNameko(index) {
-    const nameko = namekos[index];
-    namekos.splice(index, 1);
-    displayNamekos();
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            // 修正: 所持金の表示をリアルタイムで更新
-            document.getElementById('money-display').textContent = `${xhr.responseText}c`;
-        } else {
-            console.error('エラー: サーバーへの収穫ログ送信に失敗しました。');
+            saveNamekos();  // ローカルストレージに保存
         }
-    };
-    xhr.send(`name=${encodeURIComponent(nameko.name)}&point=${nameko.point}`);
-}
+    }
+
+    // なめこの成長を一度だけ開始
+    function startGrowth() {
+        if (!growthInterval) {
+            growthInterval = setInterval(growNameko, growthTime);
+        }
+    }
+
+    // ページ読み込み時に成長開始とデータ復元
+    window.addEventListener('load', function() {
+        loadNamekos();
+        displayNamekos();  // 保存されたデータを表示
+        startGrowth();
+    });
+
+    // キャラクター情報をローカルストレージに保存（ユーザーごとに保存）
+    function saveNamekos() {
+        localStorage.setItem(`namekos_${userId}`, JSON.stringify(namekos));
+    }
+
+    // なめこを表示する関数
+    function displayNamekos() {
+        const namekoContainer = document.getElementById('nameko-container');
+        namekoContainer.innerHTML = '<div class="log"></div>';
+        const containerWidth = namekoContainer.offsetWidth;
+        const logHeight = window.innerHeight * 0.8;
+        const totalColumns = 14;
+        const offsetY = 100;
+
+        namekos.forEach((nameko, index) => {
+            const namekoElement = document.createElement('span');
+            const imgElement = document.createElement('img');
+            imgElement.src = nameko.character_image;
+            imgElement.alt = nameko.name;
+            imgElement.title = `${nameko.name} - ${nameko.rarity}`;
+            imgElement.style.width = '80px';
+            imgElement.style.height = '80px';
+            namekoElement.appendChild(imgElement);
+            namekoElement.addEventListener('click', () => harvestNameko(index));
+
+            const xPosition = (index % totalColumns) * (containerWidth / (totalColumns + 2));
+            const yPosition = logHeight - (100 * Math.floor(index / totalColumns)) - offsetY;
+            namekoElement.style.left = `${xPosition}px`;
+            namekoElement.style.bottom = `${yPosition}px`;
+            namekoElement.style.position = 'absolute';
+            namekoContainer.appendChild(namekoElement);
+        });
+    }
+
+    // なめこを収穫する関数
+    function harvestNameko(index) {
+        const nameko = namekos[index];
+        namekos.splice(index, 1);
+        displayNamekos();
+        saveNamekos();  // 収穫後に保存
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                document.getElementById('money-display').textContent = `${xhr.responseText}c`;
+            } else {
+                console.error('エラー: 収穫ログ送信に失敗');
+            }
+        };
+        xhr.send(`name=${encodeURIComponent(nameko.name)}&point=${nameko.point}`);
+    }
+</script>
 
 
-    </script>
+
 </body>
 </html>

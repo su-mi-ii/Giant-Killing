@@ -27,7 +27,7 @@ $errorMessages = [];
 // 購入処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = $_POST['item_id'];
-    
+
     // 選択したアイテム情報を取得
     $sql = "SELECT price, effect, level, item_name FROM items WHERE item_id = :item_id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
@@ -51,6 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->execute();
+
+        // レア薬購入処理
+        if ($item['item_name'] === 'レア薬') {
+            $sql = "UPDATE users SET rare_drug_purchased = 1 WHERE user_id = :user_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $_SESSION['rare_drug_purchased'] = true; // セッションにも反映
+        }
 
         // 成長速度の効果を反映する例
         if ($item['effect'] === '成長速度上昇') {
