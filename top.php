@@ -20,16 +20,20 @@ try {
     exit;
 }
 
-// データベースからユーザーの所持金を取得し、セッションに保存
+// データベースからユーザーの所持金と生命維持装置の状態を取得し、セッションに保存
 try {
-    $sql = "SELECT money, rare_drug_purchased FROM users WHERE user_id = :user_id";
+    $sql = "SELECT money, rare_drug_purchased, life_support_purchased, life_support_active FROM users WHERE user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
     $totalMoney = $user['money'] ?? 0;
     $_SESSION['total_money'] = $totalMoney; 
     $rareDrugPurchased = $user['rare_drug_purchased'] ?? false;
+    $isLifeSupportPurchased = $user['life_support_purchased'] ?? false;
+    $isLifeSupportActive = $user['life_support_active'] ?? false;
+
 } catch (PDOException $e) {
     echo '所持金データの取得エラー: ' . htmlspecialchars($e->getMessage());
     exit;
@@ -441,6 +445,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         };
         xhr.send(`name=${encodeURIComponent(nameko.name)}&point=${nameko.point}`);
     }
+
+            // PHPから生命維持装置の購入状況を渡す
+            const isLifeSupportPurchased = <?php echo json_encode($isLifeSupportPurchased); ?>;
+            const isLifeSupportActive = <?php echo json_encode($isLifeSupportActive); ?>;
+
+            function startDecay() {
+    // 生命維持装置が購入済みでONの場合は消滅処理を停止
+    if (isLifeSupportPurchased && isLifeSupportActive) {
+        console.log("生命維持装置がONです。消滅処理を停止します。");
+        return;
+    }
+
+    console.log("生命維持装置がOFFです。消滅処理を開始します。");
+
+    setInterval(() => {
+        if (namekos.length > 0) {
+            namekos.shift(); // 配列の先頭を削除
+            displayNamekos(); // 表示を更新
+        }
+    }, 30000); // 30秒ごと
+}
+
+    
+
+        // ページ読み込み時に消滅開始
+        window.addEventListener('load', startDecay);
 </script>
 
 

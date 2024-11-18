@@ -1,6 +1,6 @@
-<?php
-require 'db-connect.php';
-session_start(); // セッションを開始
+<?php 
+require 'db-connect.php'; 
+session_start(); 
 
 // ユーザーIDの取得
 $user_id = $_SESSION['user_id'] ?? null;
@@ -11,7 +11,7 @@ if (!$user_id) {
 
 // キャラクター情報を取得
 try {
-    $sql = "SELECT name, rarity, character_image, point FROM characters";
+    $sql = "SELECT name, rarity, character_image, point FROM characters WHERE rarity IN (1, 2)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -20,24 +20,42 @@ try {
     exit;
 }
 
-// データベースからユーザーの所持金を取得し、セッションに保存
+// データベースからユーザーの所持金と生命維持装置の状態を取得し、セッションに保存
 try {
-    $sql = "SELECT money FROM users WHERE user_id = :user_id";
+    $sql = "SELECT money, rare_drug_purchased, life_support_purchased, life_support_active FROM users WHERE user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
     $totalMoney = $user['money'] ?? 0;
-    $_SESSION['total_money'] = $totalMoney; // セッションに所持金を保存
+    $_SESSION['total_money'] = $totalMoney; 
+    $rareDrugPurchased = $user['rare_drug_purchased'] ?? false;
+    $isLifeSupportPurchased = $user['life_support_purchased'] ?? false;
+    $isLifeSupportActive = $user['life_support_active'] ?? false;
+
 } catch (PDOException $e) {
     echo '所持金データの取得エラー: ' . htmlspecialchars($e->getMessage());
     exit;
 }
 
+// レア薬購入後、レア度1～5までのキャラクターを成長対象にする
+if ($rareDrugPurchased) {
+    try {
+        $sql = "SELECT name, rarity, character_image, point FROM characters";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo 'データ取得エラー: ' . htmlspecialchars($e->getMessage());
+        exit;
+    }
+}
+
 // 収穫時の処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $characterName = $_POST['name'] ?? '';
-    $characterPoint = (int)($_POST['point'] ?? 0); // 収穫したキャラクターのポイント
+    $characterPoint = (int)($_POST['point'] ?? 0);
 
     try {
         // 現在の所持金を再取得
@@ -68,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // セッションにも新しい所持金を保存
         $_SESSION['total_money'] = $newMoney;
-        echo $newMoney; // 新しい所持金を返す
+        echo $newMoney;
     } catch (PDOException $e) {
         echo 'エラー: ' . htmlspecialchars($e->getMessage());
     }
@@ -86,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             text-align: center;
-            background-image: url('image/☆１内山.png');
+            background-image: url('image/gensou.webp');
             background-size: cover; /* 全画面に拡大 */
             background-position: center;
         }
@@ -142,15 +160,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* pointbox-image（右側の画像群）の位置調整は既存のままで問題ありません */
             .pointbox-image {
-                float: right;
-                position: relative;
+                position: absolute;
+                right: 20px;
+                top: 0px; 
                 z-index: 10;
                 margin-left: auto;
                 margin-right: 30px;
                 top: 80px;
             }
+
             .wallet-container {
-                position: fixed;
+                position: absolute;
                 top: 20px;
                 right: 20px;
                 background-color: #ffcf33; /* 背景色を黄色に設定 */
@@ -172,10 +192,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     vertical-align: middle; /* アイコンをテキストと中央揃え */
                 }
 
-            .shoumei {
+            .taiyou1-image {
                 position: absolute;
                 left: 300px;
                 top: 0px; 
+                z-index: 10;
+            }
+
+        
+            .takibi-image {
+                position: absolute;
+                left: 200px;
+                bottom: 20px; 
+                z-index: 10; 
+            }
+
+            .spring-image{
+                position: absolute;
+                right: 200px;
+                bottom: 20px; 
                 z-index: 10;
             }
 
@@ -244,8 +279,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="world.php"><img src="image/world.webp" alt="世界" ></a>
     </div>
 
-    <div class="shoumei">
-    <img src="image/shoumei" alt="灯" width="150" height="200"></a>
+    <div class="taiyou-image">
+    <img src="image/taiyou1" alt="灯"  width="100"; height="100";>
     </div>
 
     <div class="pointbox-image">
@@ -257,6 +292,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- なめこコンテナ -->
     <div id="nameko-container">
         <div class="log"></div>
+    </div>
+
+    <div class="spring-image">
+    <img src="image/spring1.webp" alt="灯" width="100" height="100">
+    </div>
+
+    <div class="takibi-image">
+    <img src="image/takibi1.webp" alt="灯" width="100" height="100">
     </div>
 
     <div id="container">
@@ -288,63 +331,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.location.href = page;
     }
 
-    // PHPからキャラクター情報を取得
+    // PHPから変数をJavaScriptに渡す
+    const rareDrugPurchased = <?php echo json_encode($rareDrugPurchased); ?>;
+    const userId = <?php echo json_encode($user_id); ?>;  // 現在のユーザーID
+
+    // キャラクター情報
     const characters = <?php echo json_encode($characters, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     let namekos = [];
-    const baseGrowthTime = 5000; // 元の発生速度（ミリ秒単位）
+    const maxNamekos = 24;
+    const growthTime = 5000;
+    let growthInterval;
 
-    // PHPから成長レベルを取得し、倍率を計算（例：1.1倍、1.2倍など）
-    const growthLevel = <?php echo json_encode($_SESSION['growthLevel'] ?? 1); ?>;
-    const growthMultiplier = 1 + (growthLevel - 1) * 0.1; // レベルに応じた倍率
-    let adjustedGrowthTime = baseGrowthTime / growthMultiplier; // 新しい発生速度
-
-    // ページを離れる前にnamekosを保存
-    window.addEventListener('beforeunload', function() {
-        localStorage.setItem('namekos', JSON.stringify(namekos));
-    });
-
-    // ページ読み込み時にnamekosを復元
-    window.addEventListener('load', function() {
-        const savedNamekos = localStorage.getItem('namekos');
+    // ローカルストレージから保存されたキャラクターを復元（ユーザーごとに管理）
+    function loadNamekos() {
+        const savedNamekos = localStorage.getItem(`namekos_${userId}`);
         if (savedNamekos) {
             namekos = JSON.parse(savedNamekos);
-            displayNamekos();
         }
-    });
+    }
+
+    // キャラクター生成関数
+    function getRandomCharacter() {
+        const filteredCharacters = characters.filter(character => {
+            return rareDrugPurchased ? character.rarity >= 1 && character.rarity <= 5 : character.rarity <= 2;
+        });
+
+        const totalRarity = filteredCharacters.reduce((sum, char) => sum + (6 - char.rarity), 0);
+        const randomValue = Math.random() * totalRarity;
+        let cumulativeRarity = 0;
+
+        for (const character of filteredCharacters) {
+            cumulativeRarity += (6 - character.rarity);
+            if (randomValue < cumulativeRarity) {
+                return character;
+            }
+        }
+        return filteredCharacters[0];
+    }
 
     // なめこを成長させる関数
     function growNameko() {
-        if (namekos.length < 24) { // maxNamekosを直接数値に
-            setTimeout(() => {
-                namekos.push(getRandomCharacter());
-                displayNamekos();
-            }, adjustedGrowthTime); // 成長速度に応じた成長時間を使用
+        if (namekos.length < maxNamekos) {
+            namekos.push(getRandomCharacter());
+            displayNamekos();
+            saveNamekos();  // ローカルストレージに保存
         }
     }
 
-    function getRandomCharacter() {
-        const probabilities = characters.map(character => 1 / character.rarity);
-        const totalProbability = probabilities.reduce((sum, prob) => sum + prob, 0);
-        const normalizedProbabilities = probabilities.map(prob => prob / totalProbability);
-        const randomValue = Math.random();
-        let cumulativeProbability = 0;
-
-        for (let i = 0; i < normalizedProbabilities.length; i++) {
-            cumulativeProbability += normalizedProbabilities[i];
-            if (randomValue < cumulativeProbability) return characters[i];
+    // なめこの成長を一度だけ開始
+    function startGrowth() {
+        if (!growthInterval) {
+            growthInterval = setInterval(growNameko, growthTime);
         }
-        return characters[0];
     }
 
-    setInterval(growNameko, adjustedGrowthTime + 1000);
+    // ページ読み込み時に成長開始とデータ復元
+    window.addEventListener('load', function() {
+        loadNamekos();
+        displayNamekos();  // 保存されたデータを表示
+        startGrowth();
+    });
 
+    // キャラクター情報をローカルストレージに保存（ユーザーごとに保存）
+    function saveNamekos() {
+        localStorage.setItem(`namekos_${userId}`, JSON.stringify(namekos));
+    }
+
+    // なめこを表示する関数
     function displayNamekos() {
         const namekoContainer = document.getElementById('nameko-container');
         namekoContainer.innerHTML = '<div class="log"></div>';
         const containerWidth = namekoContainer.offsetWidth;
         const logHeight = window.innerHeight * 0.8;
         const totalColumns = 14;
-        const offsetY = 150; // 位置を下げるオフセット（px単位）
+        const offsetY = 100;
 
         namekos.forEach((nameko, index) => {
             const namekoElement = document.createElement('span');
@@ -366,27 +426,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     }
 
-    // なめこを収穫
+    // なめこを収穫する関数
     function harvestNameko(index) {
         const nameko = namekos[index];
         namekos.splice(index, 1);
         displayNamekos();
+        saveNamekos();  // 収穫後に保存
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                // 修正: 所持金の表示をリアルタイムで更新
                 document.getElementById('money-display').textContent = `${xhr.responseText}c`;
             } else {
-                console.error('エラー: サーバーへの収穫ログ送信に失敗しました。');
+                console.error('エラー: 収穫ログ送信に失敗');
             }
         };
         xhr.send(`name=${encodeURIComponent(nameko.name)}&point=${nameko.point}`);
     }
 
+            // PHPから生命維持装置の購入状況を渡す
+            const isLifeSupportPurchased = <?php echo json_encode($isLifeSupportPurchased); ?>;
+            const isLifeSupportActive = <?php echo json_encode($isLifeSupportActive); ?>;
+
+            function startDecay() {
+    // 生命維持装置が購入済みでONの場合は消滅処理を停止
+    if (isLifeSupportPurchased && isLifeSupportActive) {
+        console.log("生命維持装置がONです。消滅処理を停止します。");
+        return;
+    }
+
+    console.log("生命維持装置がOFFです。消滅処理を開始します。");
+
+    setInterval(() => {
+        if (namekos.length > 0) {
+            namekos.shift(); // 配列の先頭を削除
+            displayNamekos(); // 表示を更新
+        }
+    }, 30000); // 30秒ごと
+}
+
+    
+
+        // ページ読み込み時に消滅開始
+        window.addEventListener('load', startDecay);
 </script>
+
 
 
 </body>
