@@ -80,6 +80,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['item_id'])) {
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->execute();
 
+        if ($item['item_name'] === 'レア薬') {
+            $sql = "UPDATE users SET rare_drug_purchased = 1 WHERE user_id = :user_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        
+            // SQL実行とエラー確認
+            if ($stmt->execute()) {
+                $_SESSION['rare_drug_purchased'] = true; // セッションにも反映
+                error_log("Rare drug purchase updated in DB for user_id: {$user_id}");
+            } else {
+                error_log("Failed to update rare drug purchase for user_id: {$user_id}");
+                error_log(print_r($stmt->errorInfo(), true)); // エラー情報をログ出力
+            }
+        }
+        
+
         // 生命維持装置購入処理
         if ($item['item_name'] === '生命維持装置') {
             $sql = "UPDATE users SET life_support_purchased = 1, life_support_active = 0 WHERE user_id = :user_id";
