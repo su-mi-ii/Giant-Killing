@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 INSERT INTO zukan (character_id, user_id, character_image, character_description)
                 VALUES
                 (1, :user_id, 'image/☆１寝顔.png', '寝ることが得意。気が付いたら作業から目を背けている'),
-                (2, :user_id, 'image/☆１シンプル南１.gif', '無口でシンプルな性格だが、心には深い情熱を秘めている...'),
+                (2, :user_id, 'image/☆１シンプル南.gif', '無口でシンプルな性格だが、心には深い情熱を秘めている...'),
                 (3, :user_id, 'image/☆１ダークサイド.png', 'なぜ闇落ちしたのかは不明。必殺技はドラゴブラスター'),
                 (4, :user_id, 'image/☆１南バズ.png', '南の地から来た冒険者。楽観的な性格で、いつも元気な声で周囲を盛り上げる'),
                 (5, :user_id, 'image/☆１頭.gif', 'その頭の大きさに反して、抜群のバランス感覚を持つ。知識にあふれ、パズルや戦術的な戦いを得意とする'),
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             INSERT INTO items (user_id, item_name, price, effect, item_image, level)
             VALUES
             (:user_id, '栄養剤', 5000, '成長速度上昇', 'image/eiyo.png', 0),
-            (:user_id, 'レア薬', 6000, 'レアが多く生える', 'image/rea.png', 0),
+            (:user_id, 'レア薬', 6000, '出現するレア度を上げる', 'image/rea.png', 0),
             (:user_id, 'カビ治療薬', 4000, 'カビが生えなくなる', 'image/kabi.png', 0),
             (:user_id, '生命維持装置', 4000, '人間の生命を維持できる', 'image/seimei.png', 0),
             (:user_id, 'ウチヤマワールド', 4000, 'ウチヤマワールドをアンロック', 'image/☆１内山.png', 0),
