@@ -199,7 +199,7 @@ $conn->close(); // 接続を閉じる
 </head>
 <body>
 
-<a href="top.php" class="back-button">← 戻る</a>
+<a href="zukan.php" class="back-button">← 戻る</a>
 
 
 <div class="detail-container">
