@@ -201,20 +201,25 @@ $conn->close(); // 接続を閉じる
 
 <a href="zukan.php" class="back-button">← 戻る</a>
 
-
 <div class="detail-container">
     <h1><?php echo htmlspecialchars($character['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <div class="character-content">
         <div class="character-image">
-            <img src="<?php echo htmlspecialchars($character['character_image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($character['name'], ENT_QUOTES, 'UTF-8'); ?>">
+            <?php
+            // 収穫回数が0の場合、hatena.pngを表示
+            if ($harvest_count === 0) {
+                echo '<img src="image/hatena.png">';
+            } else {
+                echo '<img src="' . htmlspecialchars($character['character_image'], ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($character['name'], ENT_QUOTES, 'UTF-8') . '">';
+            }
+            ?>
         </div>
         <div class="character-info">
-    <p class="rarity-stars">レア度: <?php echo str_repeat('★', $character['rarity']); ?></p>
-    <p><?php echo nl2br(htmlspecialchars($character['character_description'], ENT_QUOTES, 'UTF-8')); ?></p>
-    <p>収穫回数: <?php echo htmlspecialchars($harvest_count, ENT_QUOTES, 'UTF-8'); ?></p>
-    <p>ポイント: <?php echo htmlspecialchars($character['point'], ENT_QUOTES, 'UTF-8'); ?></p> <!-- ポイントを表示 -->
-</div>
-
+            <p class="rarity-stars">レア度: <?php echo str_repeat('★', $character['rarity']); ?></p>
+            <p><?php echo nl2br(htmlspecialchars($character['character_description'], ENT_QUOTES, 'UTF-8')); ?></p>
+            <p>収穫回数: <?php echo htmlspecialchars($harvest_count, ENT_QUOTES, 'UTF-8'); ?></p>
+            <p>ポイント: <?php echo htmlspecialchars($character['point'], ENT_QUOTES, 'UTF-8'); ?></p> <!-- ポイントを表示 -->
+        </div>
     </div>
 </div>
 
