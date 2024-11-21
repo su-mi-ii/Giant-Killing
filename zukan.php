@@ -20,12 +20,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name 
+// zukan テーブルと harvest_log テーブルを結合して収穫状態を確認
+$sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name,
+               (SELECT COUNT(*) FROM harvest_log WHERE harvest_log.character_id = zukan.character_id AND harvest_log.user_id = ?) AS harvested
         FROM zukan 
         JOIN characters ON zukan.character_id = characters.character_id
         WHERE zukan.user_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("ii", $user_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -136,9 +138,11 @@ $result = $stmt->get_result();
         <?php
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
+                // 収穫記録がない場合にはhatena.pngを使用
+                $characterImage = $row['harvested'] > 0 ? $row['character_image'] : 'image/hatena.png';
                 echo '<div class="card">';
                 echo '<a href="character_detail.php?entry_id=' . $row['entry_id'] . '">';
-                echo '<img src="' . $row['character_image'] . '" alt="' . $row['character_id'] . '">';
+                echo '<img src="' . $characterImage . '" alt="' . $row['character_id'] . '">';
                 echo '<h3>' . $row['name'] . '</h3>';
                 echo '</a>';
                 echo '</div>';
