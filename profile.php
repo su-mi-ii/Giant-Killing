@@ -235,6 +235,6 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
             <div>収穫総数: <?= htmlspecialchars($total_harvest) ?>人</div>
         </div>
     </div>
-
+    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

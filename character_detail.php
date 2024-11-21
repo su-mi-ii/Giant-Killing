@@ -217,6 +217,6 @@ $conn->close(); // 接続を閉じる
 
     </div>
 </div>
-
+<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

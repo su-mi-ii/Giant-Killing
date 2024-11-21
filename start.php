@@ -273,6 +273,7 @@ session_start();
             })();
         });
     </script>
+    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>
 

@@ -167,5 +167,6 @@ button[type="button"]:hover {
     <button type="button" onclick="window.location.href='menu.php';">戻る</button>
 </form>
     </div>
+    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>
