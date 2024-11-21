@@ -209,7 +209,12 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
-    <a href="top.php" class="back-button">← 戻る</a>
+<button class="back-button" onclick="history.back()">戻る</button>
+<form action="logout.php" method="post" style="position: absolute; top: 20px; right: 20px;">
+    <button type="submit" style="background: linear-gradient(135deg, #8b5e34, #a6713d); color: #fff; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-size: 1rem;">
+        ログアウト
+    </button>
+</form>
 
     <div class="card-container">
         <h2>Ningen License Card</h2>
