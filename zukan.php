@@ -154,6 +154,6 @@ $result = $stmt->get_result();
         ?>
     </div>
 </div>
-
+<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>
