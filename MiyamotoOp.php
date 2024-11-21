@@ -21,11 +21,9 @@ $randomVideo = $videos[array_rand($videos)];
             background-color: black;
             overflow: hidden;
             position: relative;
-            color: white;
         }
 
-        /* 動画サイズの調整 */
-        #ad-video {
+        video {
             max-width: 80%;    /* 横幅を画面の80%に制限 */
             max-height: 80%;   /* 高さを画面の80%に制限 */
             object-fit: contain; /* アスペクト比を維持して表示 */
@@ -49,12 +47,24 @@ $randomVideo = $videos[array_rand($videos)];
             color: red;
         }
 
+        /* 画面全体をクリックできるオーバーレイ */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+        }
+
+        /* 読み込み中メッセージ */
         #loading-message {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             font-size: 24px;
             text-align: center;
+            color: white;
         }
     </style>
 </head>
@@ -72,21 +82,31 @@ $randomVideo = $videos[array_rand($videos)];
 <!-- 動画終了後に表示される閉じるボタン（×マーク） -->
 <button id="close-button" onclick="closeAd()">×</button>
 
+<!-- 画面全体をクリック可能にするオーバーレイ -->
+<div id="overlay"></div>
+
 <script>
     const video = document.getElementById('ad-video');
+    const overlay = document.getElementById('overlay');
     const loadingMessage = document.getElementById('loading-message');
     const closeButton = document.getElementById('close-button');
 
     // 動画のプリロードを完了したら再生
     video.addEventListener('canplaythrough', function() {
         loadingMessage.style.display = 'none'; // 読み込みメッセージを非表示
-        video.play(); // 再生開始
+        video.style.display = 'block';         // 動画を表示
+        video.play();                          // 再生を開始
     });
 
     // 動画が終了したら「広告を閉じる」ボタン（×）を表示
     video.onended = function() {
         closeButton.style.display = 'block';
     };
+
+    // オーバーレイをクリックしたらYouTubeチャンネルを開く
+    overlay.addEventListener('click', function() {
+        window.open('https://youtube.com/@eula0313?si=5mbZ_jRELIrrYFek', '_blank');
+    });
 
     // 広告を閉じる処理（×をクリックしたらtop.phpに遷移）
     function closeAd() {
