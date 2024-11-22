@@ -22,7 +22,7 @@ try {
 
 // データベースからユーザーの所持金と生命維持装置の状態を取得し、セッションに保存
 try {
-    $sql = "SELECT money, rare_drug_purchased, life_support_purchased, life_support_active FROM users WHERE user_id = :user_id";
+    $sql = "SELECT money, rare_drug_purchased, life_support_purchased, life_support_active, growth_speed FROM users WHERE user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
@@ -33,6 +33,7 @@ try {
     $rareDrugPurchased = $user['rare_drug_purchased'] ?? false;
     $isLifeSupportPurchased = $user['life_support_purchased'] ?? false;
     $isLifeSupportActive = $user['life_support_active'] ?? false;
+    $growthSpeed = $user['growth_speed'] ?? 5;
 
 } catch (PDOException $e) {
     echo '所持金データの取得エラー: ' . htmlspecialchars($e->getMessage());
@@ -338,8 +339,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // キャラクター情報
     const characters = <?php echo json_encode($characters, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     let namekos = [];
-    const maxNamekos = 24;
-    const growthTime = 5000;
+    const maxNamekos = 28;
+    const growthTime = <?php echo json_encode($growthSpeed * 1000); ?>; // PHPから反映
     let growthInterval;
 
     // ローカルストレージから保存されたキャラクターを復元（ユーザーごとに管理）
@@ -467,13 +468,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }, 30000); // 30秒ごと
 }
 
-    
 
         // ページ読み込み時に消滅開始
         window.addEventListener('load', startDecay);
 </script>
 
-
+<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 
 </body>
 </html>
