@@ -86,6 +86,8 @@
         <a href="login.php" class="button">Start</a>
         <a href="Newregistration.php" class="button">新規登録</a>
     </div>
+    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 
+    
 </body>
 </html>
