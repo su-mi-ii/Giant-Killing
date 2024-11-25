@@ -11,7 +11,7 @@ if (!$user_id) {
 
 // キャラクター情報を取得
 try {
-    $sql = "SELECT name, rarity, character_image, point FROM characters WHERE rarity IN (1, 2)";
+    $sql = "SELECT name, rarity, character_image, point FROM characters WHERE character_id IN (4, 12, 15, 17, 19, 20,21)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -41,15 +41,19 @@ try {
 
 // レア薬購入後、レア度1～5までのキャラクターを成長対象にする
 if ($rareDrugPurchased) {
-    try {
-        $sql = "SELECT name, rarity, character_image, point FROM characters";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        echo 'データ取得エラー: ' . htmlspecialchars($e->getMessage());
-        exit;
-    }
+    // キャラクター情報を取得
+try {
+    $sql = "SELECT name, rarity, character_image, point, character_id 
+            FROM characters 
+            WHERE character_id IN (2,3,4, 12, 15, 17, 19, 20)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo 'データ取得エラー: ' . htmlspecialchars($e->getMessage());
+    exit;
+}
+
 }
 
 // 収穫時の処理
@@ -104,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             text-align: center;
-            background-image: url('image/gensou.webp');
+            background-image: url('image/ディズニー.png');
             background-size: cover; /* 全画面に拡大 */
             background-position: center;
         }
@@ -473,7 +477,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.addEventListener('load', startDecay);
 </script>
 
-
+<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 
 </body>
 </html>
