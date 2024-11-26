@@ -22,7 +22,7 @@ try {
 
 // データベースからユーザーの所持金と生命維持装置の状態を取得し、セッションに保存
 try {
-    $sql = "SELECT money, rare_drug_purchased, life_support_purchased, life_support_active, growth_speed FROM users WHERE user_id = :user_id";
+    $sql = "SELECT money, rare_drug_purchased, life_support_purchased, life_support_active FROM users WHERE user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
@@ -33,7 +33,6 @@ try {
     $rareDrugPurchased = $user['rare_drug_purchased'] ?? false;
     $isLifeSupportPurchased = $user['life_support_purchased'] ?? false;
     $isLifeSupportActive = $user['life_support_active'] ?? false;
-    $growthSpeed = $user['growth_speed'] ?? 5;
 
 } catch (PDOException $e) {
     echo '所持金データの取得エラー: ' . htmlspecialchars($e->getMessage());
@@ -203,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
             .takibi-image {
                 position: absolute;
-                left: 200px;
+                left: 500px;
                 bottom: 20px; 
                 z-index: 10; 
             }
@@ -316,6 +315,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
 
+
+
+
     <script>
     let isVisible = false;
     document.getElementById('main-button').addEventListener('click', function() {
@@ -339,8 +341,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // キャラクター情報
     const characters = <?php echo json_encode($characters, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
     let namekos = [];
-    const maxNamekos = 28;
-    const growthTime = <?php echo json_encode($growthSpeed * 1000); ?>; // PHPから反映
+    const maxNamekos = 24;
+    const growthTime = 5000;
     let growthInterval;
 
     // ローカルストレージから保存されたキャラクターを復元（ユーザーごとに管理）
@@ -408,10 +410,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const offsetY = 100;
 
         namekos.forEach((nameko, index) => {
-            const namekoElement = document.createElement('span');
-            const imgElement = document.createElement('img');
-            imgElement.src = nameko.character_image;
-            imgElement.alt = nameko.name;
+        const namekoElement = document.createElement('span');
+        const imgElement = document.createElement('img');
+        imgElement.src = nameko.character_image;
+        imgElement.alt = nameko.name;
             imgElement.title = `${nameko.name} - ${nameko.rarity}`;
             imgElement.style.width = '80px';
             imgElement.style.height = '80px';
@@ -465,15 +467,134 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             namekos.shift(); // 配列の先頭を削除
             displayNamekos(); // 表示を更新
         }
-    }, 30000); // 30秒ごと
+    }, 300000); // 300秒ごと
 }
 
+// ページ読み込み時に消滅開始
+// ダーク化関数
+// キャラクター生成関数（生成時間を追加）
+function getRandomCharacter() {
+    const filteredCharacters = characters.filter(character => {
+        return rareDrugPurchased ? character.rarity >= 1 && character.rarity <= 5 : character.rarity <= 2;
+    });
 
-        // ページ読み込み時に消滅開始
-        window.addEventListener('load', startDecay);
+    const totalRarity = filteredCharacters.reduce((sum, char) => sum + (6 - char.rarity), 0);
+    const randomValue = Math.random() * totalRarity;
+    let cumulativeRarity = 0;
+
+    for (const character of filteredCharacters) {
+        cumulativeRarity += (6 - character.rarity);
+        if (randomValue < cumulativeRarity) {
+            return {
+                ...character,
+                createdAt: Date.now() // 生えた時間を記録
+            };
+        }
+    }
+    return {
+        ...filteredCharacters[0],
+        createdAt: Date.now() // 生えた時間を記録
+    };
+}
+
+// キャラクターがダークサイドに変化する関数
+function transformCharacterToDarkSide(index) {
+    const nameko = namekos[index];
+    if (!nameko) return;
+
+    nameko.character_image = 'image/☆１ダークサイド.png'; // ダークサイド用画像
+    nameko.rarity = 0; // ダークサイド専用のレアリティ（例）
+    displayNamekos(); // UI更新
+    saveNamekos(); // ローカルストレージ保存
+}
+
+// キャラクター生成時に変化タイマーを設定
+function setTransformationTimer(index) {
+    const nameko = namekos[index];
+    if (!nameko) return;
+
+    const elapsedTime = Date.now() - nameko.createdAt;
+    const remainingTime = Math.max(0, 90000 - elapsedTime); // 1分半（90000ms）から経過時間を引く
+
+    setTimeout(() => {
+        transformCharacterToDarkSide(index);
+    }, remainingTime);
+}
+
+// 成長関数（タイマー設定を追加）
+function growNameko() {
+    if (namekos.length < maxNamekos) {
+        namekos.push(getRandomCharacter());
+        const index = namekos.length - 1; // 追加したキャラクターのインデックス
+        setTransformationTimer(index); // 変化タイマー設定
+        displayNamekos();
+        saveNamekos(); // 保存
+    }
+}
+
+// ページ読み込み時に既存データにタイマーを再設定
+function resetTransformationTimers() {
+    namekos.forEach((_, index) => {
+        setTransformationTimer(index); // 各キャラクターにタイマーを再設定
+    });
+}
+
+// ページ読み込み時の処理
+window.addEventListener('load', function() {
+    loadNamekos();
+    displayNamekos(); // 保存されたデータを表示
+    resetTransformationTimers(); // 既存キャラクターにタイマー設定
+    startGrowth(); // 成長開始
+    startDecay(); // 消滅処理開始
+});
+
+// サーバーからデータを取得して画面を更新する（必要に応じて追加）
+fetch('get_namekos.php') // 全なめこデータを取得するAPI
+    .then(response => response.json())
+    .then(namekos => {
+        // なめこの状態を更新
+        updateNamekoDisplay(namekos); // 必要に応じてカスタム関数を使用
+    })
+    .catch(error => console.error('なめこの取得エラー:', error));
+
+
+    window.addEventListener('message', function (event) {
+        if (event.data === 'growNamekos') {
+            growAllNamekos(); // なめこを生やす関数を実行
+        }
+    });
+
+
+
+// ページ遷移後にメッセージを受け取る
+window.addEventListener('load', function() {
+    const message = localStorage.getItem('message');
+
+    // 'growAllNamekos' メッセージが保存されていれば、なめこを生成
+    if (message === 'growAllNamekos') {
+        growAllNamekos();  // 修正：正しい関数名を呼び出す
+    }
+
+    // メッセージを消す（次回アクセスのために削除）
+    localStorage.removeItem('message');
+});
+
+
+// なめこを生やす関数
+function growAllNamekos() {
+    // maxNamekos個のなめこを一気に追加
+    while (namekos.length < maxNamekos) {
+        namekos.push(getRandomCharacter());  // ランダムにキャラクターを取得して追加
+    }
+    // なめこの表示を更新
+    displayNamekos();
+    // 状態を保存
+    saveNamekos();
+}
+
 </script>
 
-<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
+
 
 </body>
 </html>
