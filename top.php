@@ -588,7 +588,7 @@ function growAllNamekos() {
     }
     // なめこの表示を更新
     displayNamekos();
-    // 状態を保存
+    // 状態を保存!
     saveNamekos();
 }
 

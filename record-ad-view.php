@@ -28,7 +28,7 @@ if ($ad_view) {
 }
 $stmt->execute();
 
-// 広告ページにリダイレクト
+// 広告ページにリダイレクト!
 header('Location: MiyamotoOp.php');
 exit();
 ?>
