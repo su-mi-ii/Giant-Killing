@@ -110,7 +110,7 @@ $remainingViews = $max_views_per_day - $views_today;
     }
 
     function closeAdPopup() {
-        window.location.href = 'top.php'; // 閉じるボタンでトップに戻る
+        window.location.href = 'top.php'; // 閉じるボタンでトップに戻る!
     }
 </script>
 

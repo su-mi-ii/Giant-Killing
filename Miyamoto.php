@@ -52,7 +52,7 @@
         #popup4 {
             left: 170px;
             bottom: 20px;
-            background-image: url('image/pro.png'); /* 4の画像 */
+            background-image: url('image/pro.png'); /* 4の画像! */
         }
     </style>
 </head>

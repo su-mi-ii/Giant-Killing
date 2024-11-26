@@ -83,7 +83,7 @@ $randomVideo = $videos[array_rand($videos)];
         video.play(); // 再生開始
     });
 
-    // 動画が終了したら「広告を閉じる」ボタン（×）を表示
+    // 動画が終了したら「広告を閉じる」ボタン（×）を表示!S
     video.onended = function() {
         closeButton.style.display = 'block';
     };
