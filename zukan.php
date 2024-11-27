@@ -130,8 +130,7 @@ $result = $stmt->get_result();
 </head>
 <body>
 
-<a href="top.php" class="back-button">← 戻る</a>
-
+<button class="back-button" onclick="history.back()">戻る</button>
 <div class="container">
     <h1>図鑑</h1>
     <div class="grid">
