@@ -105,10 +105,8 @@
     </style>
 </head>
 <body>
-<div class="back-button">
-            <a href="top.php">←戻る</a>
-        </div>
-    <div class="settings-container">
+<button class="back-button" onclick="history.back()">戻る</button>
+
         
 
         <h2>サウンド</h2>
