@@ -83,15 +83,21 @@ $randomVideo = $videos[array_rand($videos)];
         video.play(); // 再生開始
     });
 
-    // 動画が終了したら「広告を閉じる」ボタン（×）を表示
+    // 動画が終了したら「広告を閉じる」ボタン（×）を表示!S
     video.onended = function() {
         closeButton.style.display = 'block';
     };
 
-    // 広告を閉じる処理（×をクリックしたらtop.phpに遷移）
     function closeAd() {
+    // メッセージをlocalStorageに保存
+    localStorage.setItem('message', 'growAllNamekos');
+    localStorage.setItem('debugMessage', 'デバッグ: 子ウィンドウからのメッセージ');
+
+    // 遷移を少し遅らせる
+    setTimeout(() => {
         window.location.href = 'top.php';
-    }
+    }, 100); // 100ms待機
+}
 </script>
 
 </body>
