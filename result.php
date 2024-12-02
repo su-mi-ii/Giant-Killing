@@ -99,8 +99,16 @@ if ($user_id !== null && $reward > 0) {
                 結果が取得できませんでした。
             <?php endif; ?>
         </p>
-        <button onclick="window.location.href='battle.php'">もう一度バトル</button>
-        <button onclick="window.location.href='top.php'">ホームに戻る</button>
+        <button onclick="window.location.href='start.php'">ヒューマンバトルへ</button>
+        <button onclick="window.location.href='top.php'" onclick="closeAd()">ホームに戻る</button>
+
+        <script>
+                function closeAd() {
+            fetchNewCharacters().then(() => {
+                window.location.href = backLink; // 現在のワールドにリダイレクト
+            });
+        }
+        </script>
     </div>
 </body>
 </html>

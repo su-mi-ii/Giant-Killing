@@ -1,4 +1,5 @@
 <?php
+ob_start();  // 出力バッファリングを開始
 require 'db-connect.php';
 session_start();
 
@@ -10,7 +11,7 @@ if (!$user_id) {
 }
 
 // ユーザー情報の取得
-$sql = "SELECT money, life_support_purchased, life_support_active FROM users WHERE user_id = :user_id";
+$sql = "SELECT money, life_support_purchased, life_support_active, growth_speed FROM users WHERE user_id = :user_id";
 $stmt = $pdo->prepare($sql);
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
@@ -19,11 +20,13 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $totalMoney = $user['money'] ?? 0;
 $lifeSupportPurchased = $user['life_support_purchased'] ?? 0; // 購入状態
 $lifeSupportActive = $user['life_support_active'] ?? 0;       // ON/OFF状態
+$growthSpeed = $user['growth_speed'] ?? 5;
 
 // セッションに保存
 $_SESSION['total_money'] = $totalMoney;
 $_SESSION['life_support_purchased'] = $lifeSupportPurchased;
 $_SESSION['life_support_active'] = $lifeSupportActive;
+$_SESSION['growth_speed'] = $growthSpeed;
 
 // アイテム情報を取得
 $sql = "SELECT item_id, item_name, price, effect, item_image, level FROM items WHERE user_id = :user_id";
@@ -109,6 +112,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['item_id'])) {
             $lifeSupportActive = false;
         }
 
+        // 栽培速度UP薬の購入処理
+        if ($item['item_name'] === '栽培速度UP薬') {
+            $sql = "UPDATE users SET growth_speed = 2.5 WHERE user_id = :user_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // セッションに新しい栽培速度を保存
+            $_SESSION['growth_speed'] = 2.5;
+
+            echo '<script>alert("栽培速度UP薬を購入しました！栽培速度が2.5秒に変更されました。");</script>';
+        }
+
         // 特定アイテム購入時にワールドアンロック
         if ($item['item_name'] === 'ウチヤマワールド' || $item['item_name'] === 'ディズニーワールド') {
             $world_type = ($item['item_name'] === 'ウチヤマワールド') ? 'utiyama' : 'disney';
@@ -139,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['item_id'])) {
         $errorMessages[$item_id] = $item['level'] > 0 ? "このアイテムはすでに購入済みです。" : "所持金が不足しています。";
     }
 }
+ob_end_flush();  // バッファリングを終了
 ?>
 
 
@@ -277,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['item_id'])) {
 <a href="top.php" class="back-button">← トップへ戻る</a>
     <div class="wallet-container">
         <img src="image/coin_kinoko.png" alt="Coin Icon"> <!-- アイコンを所持金の横に表示 -->
-        所持金: <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
+        <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
     </div>
 
     <div class="container">
@@ -342,6 +359,6 @@ function toggleLifeSupport() {
 
 
 </script>
-
+<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

@@ -242,5 +242,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endforeach; ?>
     </div>
+    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

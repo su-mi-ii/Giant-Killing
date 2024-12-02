@@ -292,7 +292,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
 <body>
     <h1>編成画面</h1>
  
-     
+    <!-- 並び替えの選択フォーム -->
+    <div class="controls">
+        <form method="POST">
+            <label for="sort">並び替え:</label>
+            <select name="sort" id="sort" onchange="this.form.submit()">
+                <option value="harvest_time" <?= isset($_POST['sort']) && $_POST['sort'] === 'harvest_time' ? 'selected' : '' ?>>入手順</option>
+                <option value="rarity" <?= isset($_POST['sort']) && $_POST['sort'] === 'rarity' ? 'selected' : '' ?>>レア度順</option>
+                <option value="attack_type" <?= isset($_POST['sort']) && $_POST['sort'] === 'attack_type' ? 'selected' : '' ?>>タイプ順</option>
+            </select>
+        </form>
+    </div>
+
     <!-- パーティースロット -->
     <div class="party-slot-container">
         <?php foreach ($party as $position => $character): ?>
@@ -309,10 +320,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
         <button type="button" onclick="window.location.href='start.php'">戻る</button>
     </form>
 
- 
     <!-- キャラクターリストと詳細表示 -->
     <div class="container">
         <div class="character-list">
+            <?php
+            // 並び替え処理
+            if (isset($_POST['sort'])) {
+                $sort = $_POST['sort'];
+                if ($sort === 'rarity') {
+                    usort($characters, function($a, $b) {
+                        return $a['rarity'] <=> $b['rarity'];
+                    });
+                } elseif ($sort === 'attack_type') {
+                    usort($characters, function($a, $b) {
+                        return $a['attack_type'] <=> $b['attack_type'];
+                    });
+                } elseif ($sort === 'harvest_time') {
+                    usort($characters, function($a, $b) {
+                        return strtotime($b['harvest_time']) - strtotime($a['harvest_time']);
+                    });
+                }
+            }
+            ?>
+
             <?php foreach ($characters as $character): ?>
                 <form class="character" method="POST">
                     <input type="hidden" name="character_id" value="<?= htmlspecialchars($character['character_id'], ENT_QUOTES, 'UTF-8') ?>">
@@ -337,9 +367,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
                 </form>
             <?php endforeach; ?>
         </div>
- 
- 
- 
+
         <!-- キャラクター詳細 -->
         <div class="details">
             <h2>選択したキャラクターの詳細</h2>
@@ -355,6 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
             <?php endif; ?>
         </div>
     </div>
+
     <script>
         // フォームの送信を非同期にする
         document.querySelectorAll('.character form').forEach(form => {
@@ -377,6 +406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
         });
     </script>
 </body>
+
 </html>
  
  
