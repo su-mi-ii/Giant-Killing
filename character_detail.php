@@ -74,11 +74,15 @@ $conn->close(); // 接続を閉じる
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>キャラクター詳細</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-        }
+       body {
+    font-family: Arial, sans-serif;
+    background-image: url('image/特級術士.png'); /* 背景画像を指定 */
+    background-size: cover; /* 画像を画面全体に表示 */
+    background-repeat: no-repeat; /* 画像を繰り返さない */
+    background-position: center center; /* 画像を中央に配置 */
+    text-align: center;
+}
+
 
         .detail-container {
             width: 70%;
