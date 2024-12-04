@@ -77,6 +77,8 @@
 
     <div class="container">
         <h1>新規登録</h1>
+        <iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
+
         <form action="/register" method="POST">
             <label for="username">ユーザー名</label>
             <input type="text" id="username" name="username" required>
@@ -90,6 +92,5 @@
             </div>
         </form>
     </div>
-    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

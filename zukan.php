@@ -1,5 +1,6 @@
 <?php 
 session_start();
+require 'db-connect.php'; // db-connect.php を正しく利用
 
 // ログインしているか確認
 if (!isset($_SESSION['user_id'])) {
@@ -9,29 +10,32 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-$servername = "mysql311.phy.lolipop.lan";
-$username = "LAA1517492";
-$password = "Pass0313"; // 実際のパスワードに置き換えてください
-$dbname = "LAA1517492-giants";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 // zukan テーブルと harvest_log テーブルを結合して収穫状態を確認
 $sql = "SELECT zukan.entry_id, zukan.character_id, zukan.character_image, characters.name,
-               (SELECT COUNT(*) FROM harvest_log WHERE harvest_log.character_id = zukan.character_id AND harvest_log.user_id = ?) AS harvested
+               (SELECT COUNT(*) FROM harvest_log WHERE harvest_log.character_id = zukan.character_id AND harvest_log.user_id = :user_id) AS harvested
         FROM zukan 
         JOIN characters ON zukan.character_id = characters.character_id
-        WHERE zukan.user_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $user_id, $user_id);
+        WHERE zukan.user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
-$result = $stmt->get_result();
-?>
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// 現在のワールドを取得
+$sql_world = "SELECT current_world FROM users WHERE user_id = :user_id";
+$stmt_world = $pdo->prepare($sql_world);
+$stmt_world->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt_world->execute();
+$current_world = $stmt_world->fetchColumn();
+
+// 現在のワールドに応じた戻る URL を設定
+$backUrl = 'top.php'; // デフォルトは top.php
+if ($current_world === 'SD3E') {
+    $backUrl = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $backUrl = 'disney_top.php';
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -130,30 +134,29 @@ $result = $stmt->get_result();
 </head>
 <body>
 
-<a href="top.php" class="back-button">← 戻る</a>
+<a href="<?= htmlspecialchars($backUrl) ?>" class="back-button">← 戻る</a>
 
 <div class="container">
     <h1>図鑑</h1>
     <div class="grid">
         <?php
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
+        if (!empty($result)) {
+            foreach ($result as $row) {
                 // 収穫記録がない場合にはhatena.pngを使用
                 $characterImage = $row['harvested'] > 0 ? $row['character_image'] : 'image/hatena.png';
                 echo '<div class="card">';
-                echo '<a href="character_detail.php?entry_id=' . $row['entry_id'] . '">';
-                echo '<img src="' . $characterImage . '" alt="' . $row['character_id'] . '">';
-                echo '<h3>' . $row['name'] . '</h3>';
+                echo '<a href="character_detail.php?entry_id=' . htmlspecialchars($row['entry_id']) . '">';
+                echo '<img src="' . htmlspecialchars($characterImage) . '" alt="' . htmlspecialchars($row['character_id']) . '">';
+                echo '<h3>' . htmlspecialchars($row['name']) . '</h3>';
                 echo '</a>';
                 echo '</div>';
             }
         } else {
             echo "<p>キャラクターが見つかりません</p>";
         }
-        $conn->close();
         ?>
     </div>
 </div>
-<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
+<iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

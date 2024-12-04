@@ -58,115 +58,142 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>ログイン</title>
     <style>
-     /* リセットスタイル */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        /* リセットスタイル */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: url('image/toroku.png') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #ffffff;
+        }
 
-.container {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-}
+        .container {
+            background: rgba(49 47 47 / 80%); /* 背景を濃く調整 */
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
 
-h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-}
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ffffff;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
 
-form {
-    margin-bottom: 10px;
-}
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #555;
-}
+        label {
+            font-size: 16px; /* フォントサイズを調整 */
+            color: #ffffff;
+            margin-bottom: 5px;
+            align-self: flex-start;
+        }
 
-input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-}
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ffffff; /* 白い枠線を追加 */
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2); /* 半透明の白背景 */
+            font-size: 16px;
+            color: #ffffff;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
 
-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #4CAF50;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    margin-bottom: 10px;
-}
+        input[type="text"]::placeholder,
+        input[type="password"]::placeholder {
+            color: #dddddd; /* プレースホルダーを薄い灰色に */
+        }
 
-button:hover {
-    background-color: #45a049;
-}
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            background: rgba(255, 255, 255, 0.3); /* フォーカス時の背景を少し明るく */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            outline: none;
+        }
 
-p {
-    font-size: 14px;
-    color: red;
-    margin-bottom: 15px;
-    text-align: center;
-}
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background: linear-gradient(135deg, #0056b3, #004494); /* 濃い青に変更 */
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
 
-button[type="submit"] {
-    background-color: #4CAF50;
-}
+        button:hover {
+            background: linear-gradient(135deg, #004494, #003377); /* ホバー時にさらに濃く */
+            box-shadow: 0 5px 15px rgba(0, 51, 119, 0.4);
+        }
 
-button[type="submit"]:hover {
-    background-color: #45a049;
-}
+        .back-button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #ffffff;
+            border-radius: 25px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
 
-button[type="button"] {
-    background-color: #555;
-}
+        .back-button:hover {
+            background: #ffffff;
+            color: #000;
+        }
 
-button[type="button"]:hover {
-    background-color: #333;
-}
-
-        </style>
+        p {
+            font-size: 14px;
+            color: #ff6b6b; /* エラーメッセージを目立たせる */
+            margin-top: 10px;
+        }
+    </style>
+    <?php include 'header.php'; ?>
 </head>
 <body>
+<iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
     <div class="container">
         <h1>ログイン</h1>
         <form method="post">
             <label for="user_name">ユーザー名</label>
-            <input type="text" name="user_name" id="user_name" required>
+            <input type="text" name="user_name" id="user_name" placeholder="ユーザー名を入力" required>
             <label for="password">パスワード</label>
-            <input type="password" name="password" id="password" required>
-            <?php if (!empty($error_message)) { echo '<p>' . htmlspecialchars($error_message) . '</p>'; }?>
-
+            <input type="password" name="password" id="password" placeholder="パスワードを入力" required>
+            <?php if (!empty($error_message)) { echo '<p>' . htmlspecialchars($error_message) . '</p>'; } ?>
             <button type="submit">ログイン</button>
         </form>
-        <form action="menu.php">
-    <button type="button" onclick="window.location.href='menu.php';">戻る</button>
-</form>
+        <button class="back-button" onclick="window.location.href='menu.php';">戻る</button>
     </div>
-    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
+   
 </body>
 </html>

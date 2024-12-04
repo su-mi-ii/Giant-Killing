@@ -9,9 +9,9 @@ $user_id = $_SESSION['user_id'] ?? null; // セッションでログイン中の
 // 報酬の設定（勝利：3000、敗北：1000）
 $reward = 0;
 if ($result === 'win') {
-    $reward = 3000;
+    $reward = 100;
 } elseif ($result === 'lose') {
-    $reward = 1000;
+    $reward = 5;
 }
 
 // moneyを更新する処理
@@ -32,6 +32,27 @@ if ($user_id !== null && $reward > 0) {
         echo "エラーが発生しました: " . $e->getMessage();
         exit;
     }
+}
+
+// 現在のワールドを取得
+$current_world = 'default_world'; // デフォルト値
+if ($user_id) {
+    try {
+        $stmt = $pdo->prepare("SELECT current_world FROM users WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+        $current_world = $stmt->fetchColumn() ?: 'default_world';
+    } catch (PDOException $e) {
+        echo "エラーが発生しました: " . $e->getMessage();
+        exit;
+    }
+}
+
+// 戻り先URLを設定
+$back_link = 'top.php'; // デフォルトはトップページ
+if ($current_world === 'SD3E') {
+    $back_link = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $back_link = 'disney_top.php';
 }
 ?>
 <!DOCTYPE html>
@@ -100,15 +121,17 @@ if ($user_id !== null && $reward > 0) {
             <?php endif; ?>
         </p>
         <button onclick="window.location.href='start.php'">ヒューマンバトルへ</button>
-        <button onclick="window.location.href='top.php'" onclick="closeAd()">ホームに戻る</button>
-
-        <script>
-                function closeAd() {
-            fetchNewCharacters().then(() => {
-                window.location.href = backLink; // 現在のワールドにリダイレクト
-            });
-        }
-        </script>
+        <button id="home-button">ホームに戻る</button>
     </div>
+    <iframe src="btlbgm_player.php" style="display:none;" id="bgm-frame"></iframe>
+    <script>
+        // PHPから戻り先リンクをJavaScriptに渡す
+        const backLink = <?php echo json_encode($back_link); ?>;
+
+        // ホームボタンのクリックイベント
+        document.getElementById('home-button').onclick = function() {
+            window.location.href = backLink; // 現在のワールドにリダイレクト
+        };
+    </script>
 </body>
 </html>

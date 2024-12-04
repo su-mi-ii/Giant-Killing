@@ -17,8 +17,8 @@ if (isset($_GET['world'])) {
     $stmt->execute();
 
     // ワールドに応じたページにリダイレクト
-    if ($selected_world === 'utiyama') {
-        header('Location: utiyama_top.php');
+    if ($selected_world === 'SD3E') {
+        header('Location: SD3E_top.php');
         exit;
     } elseif ($selected_world === 'disney') {
         header('Location: disney_top.php');
@@ -36,6 +36,14 @@ $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
 $current_world = $stmt->fetchColumn();
 
+// 現在のワールドに応じた戻る URL を設定
+$backUrl = 'top.php'; // デフォルトは top.php
+if ($current_world === 'SD3E') {
+    $backUrl = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $backUrl = 'disney_top.php';
+}
+
 // ユーザーが開放したワールドを取得
 $sql = "SELECT world_type FROM world WHERE user_id = :user_id";
 $stmt = $pdo->prepare($sql);
@@ -46,7 +54,7 @@ $unlocked_worlds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 // ワールド情報を設定
 $worlds = [
     'default' => ['name' => 'デフォルトワールド', 'image' => 'image/harry.png'],
-    'utiyama' => ['name' => 'ウチヤマ ワールド', 'image' => 'image/☆１内山.png'],
+    'SD3E' => ['name' => 'SD3E ワールド', 'image' => 'image/SD3E.png'],
     'disney' => ['name' => 'ディズニー ワールド', 'image' => 'image/ディズニー.png']
 ];
 ?>
@@ -58,92 +66,111 @@ $worlds = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ワールド選択</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #f2f2f2, #ffffff);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #333;
-        }
+       body {
+    font-family: 'Press Start 2P', sans-serif; /* レトロゲーム風フォント */
+    background: url('image/warp.png') no-repeat center center fixed; /* ゲーム風背景画像 */
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    height: 100vh; /* 画面全体をカバー */
+}
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            color: #444;
-            text-shadow: 1px 1px 2px #ddd;
-        }
+h1 {
+    font-size: 3rem;
+    margin-bottom: 40px;
+    color: #ffcc00; /* ゴールド風の文字色 */
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7), 0 0 20px #ffcc00, 0 0 30px #ffcc00; /* 光るテキスト */
+}
 
-        .container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            width: 90%;
-            max-width: 600px;
-        }
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 自動調整のグリッド */
+    gap: 20px;
+    padding: 20px;
+    max-width: 900px;
+    border: 3px solid #444;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.7); /* 半透明の黒背景 */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); /* ボックスシャドウ */
+}
 
-        .world-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #f7f7f7;
-            border-radius: 12px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-decoration: none;
-            color: #333;
-        }
+.world-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(145deg, #3a3a3a, #1a1a1a); /* 立体的な背景色 */
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid #555;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+    text-decoration: none;
+    color: #fff;
+}
 
-        .world-option:hover {
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(-5px);
-            background-color: #e0e0e0;
-        }
+.world-option img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+    border: 3px solid #444;
+    border-radius: 50%;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
 
-        .world-option img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            transition: transform 0.3s ease;
-        }
+.world-option:hover {
+    transform: translateY(-10px) scale(1.1);
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.8);
+    background: linear-gradient(145deg, #555, #333);
+}
 
-        .world-option.current-world {
-            background: #e7f7e7;
-            border: 1px solid #4CAF50;
-        }
+.world-option:hover img {
+    transform: rotate(360deg); /* 回転アニメーション */
+    border-color: #ffcc00; /* ゴールドの縁 */
+}
 
-        .disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+.world-option.current-world {
+    background: linear-gradient(145deg, #ffcc00, #ffaa00);
+    box-shadow: 0 0 20px #ffcc00, 0 0 40px #ffaa00;
+}
 
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: #4CAF50;
-            color: #fff;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-        }
+.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
 
-        .back-button:hover {
-            background-color: #45a049;
-        }
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #8b5e34, #a6713d);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #e64a19;
+    transform: translateY(-5px);
+}
+
     </style>
 </head>
 <body>
 
-    <button class="back-button" onclick="window.location.href='top.php'">戻る</button>
+    <button class="back-button" onclick="window.location.href='<?= htmlspecialchars($backUrl) ?>'">← 戻る</button>
 
     <h1>ワールド選択</h1>
 
@@ -162,6 +189,6 @@ $worlds = [
             <?php endif; ?>
         <?php endforeach; ?>
     </div>
-    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
+    <iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

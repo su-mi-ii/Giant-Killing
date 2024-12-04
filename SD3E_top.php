@@ -11,7 +11,7 @@ if (!$user_id) {
 
 // キャラクター情報を取得
 try {
-    $sql = "SELECT name, rarity, character_image, point FROM characters WHERE character_id IN (2,3,4, 12, 15, 17, 19, 20,21,25,26)";
+    $sql = "SELECT name, rarity, character_image, point FROM characters WHERE character_id IN (1, 2, 9, 10, 16, 21,22,23,24,27)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -46,7 +46,7 @@ if ($rareDrugPurchased) {
 try {
     $sql = "SELECT name, rarity, character_image, point, character_id 
             FROM characters 
-            WHERE character_id IN (2,3,4, 12, 15, 17, 19, 20,21,25,26)";
+            WHERE character_id IN (1, 2, 9, 10, 16, 21,22,23,24,27)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             text-align: center;
-            background-image: url('image/ディズニー２.png');
+            background-image: url('image/SD3E.png');
             background-size: cover; /* 全画面に拡大 */
             background-position: center;
         }
@@ -468,7 +468,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             namekos.shift(); // 配列の先頭を削除
             displayNamekos(); // 表示を更新
         }
-    }, 40000); // 40秒ごと
+    }, 30000); // 30秒ごと
 }
     // ローカルストレージから新しいキャラクターをロード
     function loadNewCharacters() {

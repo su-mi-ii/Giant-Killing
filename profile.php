@@ -44,6 +44,22 @@ $sql_characters = "SELECT DISTINCT character_id, character_image FROM zukan WHER
 $stmt_characters = $pdo->prepare($sql_characters);
 $stmt_characters->execute([$user_id]);
 $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
+
+
+// 現在のワールドを取得
+$sql = "SELECT current_world FROM users WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$current_world = $stmt->fetchColumn();
+
+// 現在のワールドに応じた戻る URL を設定
+$backUrl = 'top.php'; // デフォルトは top.php
+if ($current_world === 'SD3E') {
+    $backUrl = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $backUrl = 'disney_top.php';
+}
 ?>
 
 
@@ -137,35 +153,40 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
 
         .character-grid {
             display: none;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
+            grid-template-columns: repeat(7, 1fr); /* 横7列に変更 */
+            gap: 10px; /* カードの間隔を少し広げる */
             margin-top: 20px;
-            position: absolute; /* アイコンの下に表示 */
+            position: absolute; /* 親要素に合わせて表示 */
             left: 50%;
             transform: translateX(-50%);
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.9); /* 背景の透明度を調整 */
             border-radius: 10px;
             padding: 10px;
-            z-index: 10; /* 他の要素の上に表示 */
-        }
-
-        .icon-container:hover .character-grid {
-            display: grid;
+            z-index: 10; /* 他の要素より前面に */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ボックスに影を追加 */
         }
 
         .character-grid img {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
+            width: 60px; /* アイコンサイズを調整 */
+            height: 60px; /* アイコンサイズを調整 */
+            object-fit: cover; /* アイコンのアスペクト比を保つ */
             border-radius: 5px;
             transition: transform 0.3s ease-in-out;
             cursor: pointer;
         }
 
+
+        .icon-container:hover .character-grid {
+            display: grid;
+        }
+
+        
+
         .character-grid img:hover {
             transform: scale(1.1);
         }
     </style>
+    <iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
     <script>
         function changeIcon(newIcon) {
             const xhr = new XMLHttpRequest();
@@ -205,11 +226,12 @@ $characters = $stmt_characters->fetchAll(PDO::FETCH_ASSOC);
                 characterGrid.style.display = 'none';
             });
         });
+     
     </script>
 </head>
 <body>
 
-<button class="back-button" onclick="history.back()">戻る</button>
+<a href="<?= htmlspecialchars($backUrl) ?>" class="back-button">← 戻る</a>
 <form action="logout.php" method="post" style="position: absolute; top: 20px; right: 20px;">
     <button type="submit" style="background: linear-gradient(135deg, #8b5e34, #a6713d); color: #fff; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-size: 1rem;">
         ログアウト

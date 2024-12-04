@@ -126,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['item_id'])) {
         }
 
         // 特定アイテム購入時にワールドアンロック
-        if ($item['item_name'] === 'ウチヤマワールド' || $item['item_name'] === 'ディズニーワールド') {
-            $world_type = ($item['item_name'] === 'ウチヤマワールド') ? 'utiyama' : 'disney';
+        if ($item['item_name'] === 'SD3Eワールド' || $item['item_name'] === 'ディズニーワールド') {
+            $world_type = ($item['item_name'] === 'SD3Eワールド') ? 'SD3E' : 'disney';
             
             // ユーザーがすでにこのワールドを持っているか確認
             $check_world_sql = "SELECT COUNT(*) FROM world WHERE user_id = :user_id AND world_type = :world_type";
@@ -155,6 +155,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['item_id'])) {
         $errorMessages[$item_id] = $item['level'] > 0 ? "このアイテムはすでに購入済みです。" : "所持金が不足しています。";
     }
 }
+        // 現在のワールドを取得
+        $sql = "SELECT current_world FROM users WHERE user_id = :user_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $current_world = $stmt->fetchColumn();
+
+        // 現在のワールドに応じた戻る URL を設定
+        $backUrl = 'top.php'; // デフォルトは top.php
+        if ($current_world === 'SD3E') {
+            $backUrl = 'SD3E_top.php';
+        } elseif ($current_world === 'disney') {
+            $backUrl = 'disney_top.php';
+        }
+
 ob_end_flush();  // バッファリングを終了
 ?>
 
@@ -271,27 +286,26 @@ ob_end_flush();  // バッファリングを終了
         }
 
         .back-button {
-            position: fixed;
+            position: absolute;
             top: 20px;
             left: 20px;
-            padding: 8px 12px;
-            font-size: 1rem;
-            background-color: #333;
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
             color: #fff;
-            border: none;
+            padding: 10px 20px;
             border-radius: 5px;
-            cursor: pointer;
+            font-size: 1rem;
             text-decoration: none;
             transition: background-color 0.3s;
-            z-index: 10;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
 
         .back-button:hover {
-            background-color: #555;
+            background-color: #a6713d;
         }
     </style>
 </head>
-<a href="top.php" class="back-button">← トップへ戻る</a>
+<a href="<?= htmlspecialchars($backUrl) ?>" class="back-button">← 戻る</a>
+
     <div class="wallet-container">
         <img src="image/coin_kinoko.png" alt="Coin Icon"> <!-- アイコンを所持金の横に表示 -->
         <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
@@ -333,6 +347,7 @@ ob_end_flush();  // バッファリングを終了
 <?php endforeach; ?>
 
 </div>
+<iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
 <script>
 function toggleLifeSupport() {
     const form = document.getElementById("lifeSupportToggleForm");

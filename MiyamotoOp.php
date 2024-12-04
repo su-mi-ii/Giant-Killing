@@ -1,6 +1,27 @@
 <?php
+require 'db-connect.php';
+session_start();
+
 $videos = ["Miya1.mp4", "Miya2.mp4"];
 $randomVideo = $videos[array_rand($videos)];
+
+// ログインしているユーザーのIDを取得
+$user_id = $_SESSION['user_id'];
+
+// 現在のワールドを取得
+$sql = "SELECT current_world FROM users WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$current_world = $stmt->fetchColumn();
+
+// 戻り先URLを設定
+$back_link = 'top.php'; // デフォルトはトップページ
+if ($current_world === 'SD3E') {
+    $back_link = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $back_link = 'disney_top.php';
+}
 ?>
 
 <!DOCTYPE html>
@@ -91,6 +112,9 @@ $randomVideo = $videos[array_rand($videos)];
     const loadingMessage = document.getElementById('loading-message');
     const closeButton = document.getElementById('close-button');
 
+    // PHPから戻り先リンクをJavaScriptに渡す
+    const backLink = <?php echo json_encode($back_link); ?>;
+
     // 動画のプリロードを完了したら再生
     video.addEventListener('canplaythrough', function() {
         loadingMessage.style.display = 'none'; // 読み込みメッセージを非表示
@@ -98,30 +122,37 @@ $randomVideo = $videos[array_rand($videos)];
         video.play();                          // 再生を開始
     });
 
-    // 動画が終了したら「広告を閉じる」ボタン（×）を表示!S
+    // 動画が終了したら「広告を閉じる」ボタン（×）を表示
     video.onended = function() {
         closeButton.style.display = 'block';
     };
 
-<<<<<<< HEAD
-    // オーバーレイをクリックしたらYouTubeチャンネルを開く
-    overlay.addEventListener('click', function() {
+     // オーバーレイをクリックしたらYouTubeチャンネルを開く
+     overlay.addEventListener('click', function() {
         window.open('https://youtube.com/@eula0313?si=5mbZ_jRELIrrYFek', '_blank');
     });
 
-    // 広告を閉じる処理（×をクリックしたらtop.phpに遷移）
-=======
->>>>>>> main
-    function closeAd() {
-    // メッセージをlocalStorageに保存
-    localStorage.setItem('message', 'growAllNamekos');
-    localStorage.setItem('debugMessage', 'デバッグ: 子ウィンドウからのメッセージ');
+    async function fetchNewCharacters() {
+        try {
+            const response = await fetch('fill_slots.php');
+            const result = await response.json();
 
-    // 遷移を少し遅らせる
-    setTimeout(() => {
-        window.location.href = 'top.php';
-    }, 100); // 100ms待機
-}
+            if (result.status === 'success') {
+                const newCharacters = result.characters;
+                localStorage.setItem('new_characters', JSON.stringify(newCharacters)); // ローカルストレージに保存
+            } else {
+                console.error('キャラクター生成エラー:', result.message);
+            }
+        } catch (error) {
+            console.error('通信エラー:', error);
+        }
+    }
+
+    function closeAd() {
+        fetchNewCharacters().then(() => {
+            window.location.href = backLink; // 現在のワールドにリダイレクト
+        });
+    }
 </script>
 
 </body>

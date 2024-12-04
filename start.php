@@ -1,5 +1,29 @@
 <?php
 session_start();
+require 'db-connect.php';
+
+if (!isset($_SESSION['user_id'])) {
+    echo 'ユーザーがログインしていません。';
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
+
+
+// 現在のワールドを取得
+$sql = "SELECT current_world FROM users WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$current_world = $stmt->fetchColumn();
+
+// 現在のワールドに応じた戻る URL を設定
+$backUrl = 'top.php'; // デフォルトは top.php
+if ($current_world === 'SD3E') {
+    $backUrl = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $backUrl = 'disney_top.php';
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -63,7 +87,7 @@ session_start();
             z-index: 2;
             max-width: 500px;
             width: 100%;
-            right:850px;
+            right:1000px;
         }
 
         .slide-container {
@@ -87,7 +111,7 @@ session_start();
 
         .conta button {
             font-size: 20px;
-            margin-top: 40px;
+            margin-top: 15px;
         }
 
         .monster {
@@ -171,8 +195,13 @@ session_start();
     </style>
 </head>
 <body>
+<button id="t" onclick="window.location.href='top.php';" style="position: relative;
+    z-index: 10; left:30px;">
+↼戻る
+</button>
+
     <div>GiantKilling</div>
-    <h1>　　　ヒューマンバトル</h1>
+    <h1>　ヒューマンバトル</h1>
     <div class="container-wrapper">
         <div class="container"><br><br>
             <button onclick="location.href='omiai.php'">スタート</button><br><br>
@@ -189,7 +218,8 @@ session_start();
         <div class="monster" style="background: url('image/mon_1.gif') no-repeat center center;"></div>
         <div class="monster2" style="background: url('image/kawaii2-1.gif') no-repeat center center;"></div>
     </div>
-
+    
+    <iframe src="btlbgm_player.php" style="display:none;" id="bgm-frame"></iframe>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const toggleButton = document.getElementById("toggleButton");
@@ -272,8 +302,13 @@ session_start();
                 setTimeout(loop, rand);
             })();
         });
+        function playBattleBGM() {
+    const bgmFrame = document.getElementById('bgm-frame');
+    if (bgmFrame && bgmFrame.contentWindow) {
+        bgmFrame.contentWindow.postMessage({ type: 'changeBGM', src: 'BGM/btl.mp3' }, '*');
+    }
+}
     </script>
-    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>
 

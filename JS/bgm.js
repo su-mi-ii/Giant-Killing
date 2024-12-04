@@ -1,6 +1,6 @@
 // BGM管理用のグローバル変数
 let bgmAudio = null;
-
+ 
 // BGMを初期化する関数
 function initializeBGM() {
     if (!bgmAudio) {
@@ -13,8 +13,8 @@ function initializeBGM() {
         });
     }
 }
-
-
+ 
+ 
 // BGMを変更する関数
 function changeBGM(src) {
     if (bgmAudio) {
@@ -24,7 +24,7 @@ function changeBGM(src) {
         localStorage.setItem('bgmSrc', src); // 現在のトラックを保存
     }
 }
-
+ 
 // 音量を変更する関数
 function saveVolume(volume) {
     localStorage.setItem('bgmVolume', volume);
@@ -32,14 +32,14 @@ function saveVolume(volume) {
         bgmAudio.volume = volume;
     }
 }
-
+ 
 // ページを閉じる前に現在の再生状態を保存
 window.addEventListener('beforeunload', () => {
     if (bgmAudio) {
         localStorage.setItem('bgmCurrentTime', bgmAudio.currentTime); // 再生位置を保存
     }
 });
-
+ 
 // ページ読み込み時にBGMを初期化
 window.onload = function () {
     initializeBGM();

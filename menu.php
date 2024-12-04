@@ -1,3 +1,22 @@
+<?php
+// db-connect.php を読み込む
+require_once 'db-connect.php';
+
+// 現在のワールドを取得するクエリ
+$sql = "SELECT current_world FROM users WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$current_world = $stmt->fetchColumn();
+
+// 現在のワールドに応じた URL を設定
+$backUrl = 'login.php'; // デフォルトは top.php
+if ($current_world === 'SD3E') {
+    $backUrl = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $backUrl = 'disney_top.php';
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -21,9 +40,9 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 110%; /* 少し拡大して余白を防ぐ */
+            width: 110%;
             height: 110%;
-            background-image: url('image/forest_background.jpg'); /* 景色の背景画像 */
+            background-image: url('image/forest_background.jpg');
             background-size: cover;
             background-position: center;
             animation: moveBackground 30s linear infinite;
@@ -77,17 +96,17 @@
             transform: scale(1.1);
         }
     </style>
+    <?php include 'header.php'; ?>
 </head>
 <body>
+<iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
     <div class="background"></div>
 
     <div class="container">
         <h1>Human Harvest</h1>
-        <a href="login.php" class="button">Start</a>
+        <!-- Strat ボタンで指定したワールドに遷移 -->
+        <a href="<?= htmlspecialchars($backUrl) ?>" class="button">Strat</a>
         <a href="Newregistration.php" class="button">新規登録</a>
     </div>
-    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
-
-    
 </body>
 </html>

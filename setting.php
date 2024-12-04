@@ -28,15 +28,46 @@
             position: absolute;
             top: 40px;
             left: 30px;
-            background: linear-gradient(135deg, #8b5e34, #a6713d);
+        }
+
+        .back-button a {
+            display: inline-block;
+            position: relative;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
             color: #fff;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 30px;
             font-size: 1rem;
             text-decoration: none;
-            transition: background-color 0.3s;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            z-index: 1;
         }
+
+        .back-button a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: skewX(-30deg);
+            transition: all 0.5s ease;
+            z-index: 0;
+        }
+
+        .back-button a:hover::before {
+            left: 100%;
+        }
+
+        .back-button a:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
+
         h2 {
             font-size: 24px;
             margin-bottom: 20px;
@@ -59,7 +90,7 @@
             margin-right: 10px;
         }
 
-        #bgm-value, #se-value {
+        #bgm-value {
             font-size: 16px;
         }
 
@@ -105,12 +136,10 @@
     </style>
 </head>
 <body>
-<div class="back-button">
-            <a href="top.php">←戻る</a>
-        </div>
+    <div class="back-button">
+        <a href="top.php">← 戻る</a>
+    </div>
     <div class="settings-container">
-        
-
         <h2>サウンド</h2>
 
         <div class="slider-container">
@@ -119,81 +148,49 @@
             <span id="bgm-value">50</span>
         </div>
 
-        <div class="slider-container">
-            <label for="se-volume">SE音量</label>
-            <input type="range" id="se-volume" min="0" max="100" value="50">
-            <span id="se-value">50</span>
-        </div>
-
-        <div class="bgm-selection">
-            <hr>
-            <span>BGM</span>
-            <hr>
-        </div>
-
-        <div class="bgm-options">
-            <button id="bgm-prev">◀</button>
-            <span id="bgm-title">朝の歌</span>
-            <button id="bgm-next">▶</button>
-        </div>
-
         <div class="return-title">
             <a href="menu.php">タイトルへ戻る</a>
         </div>
     </div>
 
-    <audio id="bgm-audio" src="" loop></audio>
-    <audio id="bgm-audio" src="" loop autoplay muted></audio>
-
+    <!-- BGMプレーヤーをiframeに分離 -->
+    <iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
 
     <script>
-        // 初期音量を10%に設定
-const bgmAudio = document.getElementById('bgm-audio');
-bgmAudio.volume = 0.1; // 10%
+        // 音量スライダーの操作
+        const bgmVolumeSlider = document.getElementById('bgm-volume');
+        const bgmValueLabel = document.getElementById('bgm-value');
+        const bgmFrame = document.getElementById('bgm-frame').contentWindow;
 
-const bgmVolumeSlider = document.getElementById('bgm-volume');
-const bgmValueLabel = document.getElementById('bgm-value');
+        // 初期設定
+        const savedVolume = localStorage.getItem('bgmVolume') || 50;
+        bgmVolumeSlider.value = savedVolume;
+        bgmValueLabel.textContent = savedVolume;
 
-bgmVolumeSlider.addEventListener('input', function() {
-    const volume = bgmVolumeSlider.value;
-    bgmValueLabel.textContent = volume;
-    bgmAudio.volume = volume / 100;
-});
+        bgmVolumeSlider.addEventListener('input', function () {
+            const volume = bgmVolumeSlider.value;
+            bgmValueLabel.textContent = volume;
+            localStorage.setItem('bgmVolume', volume);
+            bgmFrame.postMessage({ volume: volume / 100 }, '*');
+        });
 
-
-        const bgmTitle = document.getElementById('bgm-title');
-        const bgmTracks = [
-            { title: '朝の歌', src: 'BGM/Morning.mp3' }, 
-            { title: '別の曲', src: 'BGM/Song2.mp3' }
-        ]; 
         let currentTrackIndex = 0;
 
-        document.getElementById('bgm-prev').addEventListener('click', function() {
+        document.getElementById('bgm-prev').addEventListener('click', function () {
             currentTrackIndex = (currentTrackIndex === 0) ? bgmTracks.length - 1 : currentTrackIndex - 1;
             changeBGM();
         });
 
-        document.getElementById('bgm-next').addEventListener('click', function() {
+        document.getElementById('bgm-next').addEventListener('click', function () {
             currentTrackIndex = (currentTrackIndex + 1) % bgmTracks.length;
             changeBGM();
         });
 
         function changeBGM() {
-            bgmAudio.src = bgmTracks[currentTrackIndex].src;
-            bgmAudio.play();
-            bgmTitle.textContent = bgmTracks[currentTrackIndex].title; 
+            const track = bgmTracks[currentTrackIndex];
+            bgmFrame.postMessage({ src: track.src }, '*');
+            document.getElementById('bgm-title').textContent = track.title;
         }
-
-        window.onload = function() {
-    bgmAudio.src = bgmTracks[0].src; 
-    bgmAudio.muted = false; // 自動再生時にミュート解除
-    bgmAudio.play().catch(error => {
-        console.log("自動再生がブロックされました。ユーザーの操作が必要です。");
-    });
-    bgmTitle.textContent = bgmTracks[0].title;
-};
-
     </script>
-
 </body>
 </html>

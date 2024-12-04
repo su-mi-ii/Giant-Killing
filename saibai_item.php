@@ -1,6 +1,6 @@
 <?php
 require 'db-connect.php';
-session_start(); // セッションを開始
+session_start();
 
 // ログインユーザー情報
 $user_id = $_SESSION['user_id'];
@@ -20,12 +20,11 @@ $stmt = $pdo->prepare($sql);
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
 $tools = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// エラーメッセージを保持
 $errorMessages = [];
 
 // 購入処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 選択された道具のIDを取得
     $tool_id = $_POST['tool_id'];
 
     // 選択した道具情報を取得
@@ -37,8 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tool = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($tool) {
-        if ($tool['level'] >= 10) {
-            // レベルが10以上の場合はエラーメッセージを設定
+        if ($tool['level'] >= 3) {
             $errorMessages[$tool_id] = "これ以上レベルを上げることができません。";
         } elseif ($totalMoney >= $tool['price']) {
             // 所持金を更新
@@ -59,27 +57,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':tool_id', $tool_id, PDO::PARAM_INT);
             $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             $stmt->execute();
-
-            // 出現速度の更新（1.1倍ごとに増加）
-            if ($tool['effect'] === '発生速度上昇') {
-                $appearanceRate = 1 + (0.1 * $newLevel); // レベルに応じて0.1倍ずつ増加
-                $_SESSION['appearance_rate'] = min($appearanceRate, 2.0); // 最大2.0倍まで制限
-            }
-
-            // セッションの所持金の値を更新
-            $_SESSION['total_money'] = $newMoney;
-
-            // リダイレクトしてリフレッシュ
-            header('Location: saibai_item.php');
+            // レベルアップ成功のメッセージをJavaScriptで送信
+            echo "<script>
+                localStorage.setItem('message', 'levelup');
+                localStorage.setItem('debugMessage', 'デバッグ: 子ウィンドウからのメッセージ');
+                setTimeout(() => {
+                    window.location.href = 'top.php';
+                }, 100);
+            </script>";
             exit;
         } else {
-            // 所持金が不足している場合
             $errorMessages[$tool_id] = "所持金が不足しています。";
         }
+    } else {
+        $errorMessages[$tool_id] = "指定された道具が存在しません。";
     }
 }
-?>
 
+ // 現在のワールドを取得
+ $sql = "SELECT current_world FROM users WHERE user_id = :user_id";
+ $stmt = $pdo->prepare($sql);
+ $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+ $stmt->execute();
+ $current_world = $stmt->fetchColumn();
+
+ // 現在のワールドに応じた戻る URL を設定
+ $backUrl = 'top.php'; // デフォルトは top.php
+ if ($current_world === 'SD3E') {
+     $backUrl = 'SD3E_top.php';
+ } elseif ($current_world === 'disney') {
+     $backUrl = 'disney_top.php';
+ }
+?>
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -196,31 +205,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .back-button {
-            position: fixed;
+            position: absolute;
             top: 20px;
             left: 20px;
-            padding: 8px 12px;
-            font-size: 1rem;
-            background-color: #333;
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
             color: #fff;
-            border: none;
+            padding: 10px 20px;
             border-radius: 5px;
-            cursor: pointer;
+            font-size: 1rem;
             text-decoration: none;
             transition: background-color 0.3s;
-            z-index: 10;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
 
         .back-button:hover {
-            background-color: #555;
+            background-color: #a6713d;
         }
     </style>
 </head>
 <body>
+<iframe src="bgm_player.php" style="display:none;" id="bgm-frame"></iframe>
     <!-- 所持金表示とトップへのリンク -->
-    <a href="top.php" class="back-button">← トップへ戻る</a>
+    <a href="<?= htmlspecialchars($backUrl) ?>" class="back-button">← 戻る</a>
     <div class="wallet-container">
-        <img src="image/coin_icon.png" alt="Coin Icon"> <!-- アイコンを所持金の横に表示 -->
+    <img src="image/coin_kinoko.png" alt="Coin Icon"><!-- アイコンを所持金の横に表示 -->
         所持金: <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
     </div>
 
@@ -242,6 +250,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endforeach; ?>
     </div>
-    <iframe src="bgm.html" style="display:none;" id="bgm-frame"></iframe>
 </body>
 </html>

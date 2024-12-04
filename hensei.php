@@ -291,18 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
 </head>
 <body>
     <h1>編成画面</h1>
- 
-    <!-- 並び替えの選択フォーム -->
-    <div class="controls">
-        <form method="POST">
-            <label for="sort">並び替え:</label>
-            <select name="sort" id="sort" onchange="this.form.submit()">
-                <option value="harvest_time" <?= isset($_POST['sort']) && $_POST['sort'] === 'harvest_time' ? 'selected' : '' ?>>入手順</option>
-                <option value="rarity" <?= isset($_POST['sort']) && $_POST['sort'] === 'rarity' ? 'selected' : '' ?>>レア度順</option>
-                <option value="attack_type" <?= isset($_POST['sort']) && $_POST['sort'] === 'attack_type' ? 'selected' : '' ?>>タイプ順</option>
-            </select>
-        </form>
-    </div>
+    <iframe src="btlbgm_player.php" style="display:none;" id="bgm-frame"></iframe>
 
     <!-- パーティースロット -->
     <div class="party-slot-container">
@@ -323,25 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
     <!-- キャラクターリストと詳細表示 -->
     <div class="container">
         <div class="character-list">
-            <?php
-            // 並び替え処理
-            if (isset($_POST['sort'])) {
-                $sort = $_POST['sort'];
-                if ($sort === 'rarity') {
-                    usort($characters, function($a, $b) {
-                        return $a['rarity'] <=> $b['rarity'];
-                    });
-                } elseif ($sort === 'attack_type') {
-                    usort($characters, function($a, $b) {
-                        return $a['attack_type'] <=> $b['attack_type'];
-                    });
-                } elseif ($sort === 'harvest_time') {
-                    usort($characters, function($a, $b) {
-                        return strtotime($b['harvest_time']) - strtotime($a['harvest_time']);
-                    });
-                }
-            }
-            ?>
+            
 
             <?php foreach ($characters as $character): ?>
                 <form class="character" method="POST">
@@ -408,5 +379,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['select_character'])) 
 </body>
 
 </html>
- 
  
