@@ -111,12 +111,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-image: url('image/SD3E.png');
             background-size: cover; /* 全画面に拡大 */
             background-position: center;
+            overflow: hidden;
         }
 
         #nameko-container {
-            margin: 20px 0;
+            margin: 90px 0;
+            margin-left: 5px;
             position: relative;
         }
+ 
 
         .nameko {
             font-size: 50px;
@@ -284,7 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="taiyou-image">
-    <img src="image/taiyou1" alt="灯"  width="100"; height="100";>
+    <!-- <img src="image/taiyou1" alt="灯"  width="100"; height="100";> -->
     </div>
 
     <div class="pointbox-image">
@@ -298,13 +301,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="log"></div>
     </div>
 
-    <div class="spring-image">
+    <!-- <div class="spring-image">
     <img src="image/spring1.webp" alt="灯" width="100" height="100">
     </div>
 
     <div class="takibi-image">
     <img src="image/takibi1.webp" alt="灯" width="100" height="100">
-    </div>
+    </div> -->
 
     <div id="container">
         <div id="main-button"></div>
@@ -421,8 +424,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             namekoElement.appendChild(imgElement);
             namekoElement.addEventListener('click', () => harvestNameko(index));
 
-            const xPosition = (index % totalColumns) * (containerWidth / (totalColumns + 2));
-            const yPosition = logHeight - (100 * Math.floor(index / totalColumns)) - offsetY;
+            const gap = 0.5; // 隙間のサイズ
+            const xPosition = (index % totalColumns) * (containerWidth / totalColumns) + gap * (index % totalColumns);
+            const yPosition = logHeight - (100 + gap) * Math.floor(index / totalColumns) - offsetY;
             namekoElement.style.left = `${xPosition}px`;
             namekoElement.style.bottom = `${yPosition}px`;
             namekoElement.style.position = 'absolute';

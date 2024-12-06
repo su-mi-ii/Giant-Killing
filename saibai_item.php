@@ -108,38 +108,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .wallet-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #ffcf33;
-            padding: 10px 20px;
-            border-radius: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            z-index: 10;
-        }
-
-        .wallet-container img {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
-        }
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background-color: #ffcf33; /* 背景色を黄色に設定 */
+                padding: 15px 25px;
+                border-radius: 25px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #333;
+                display: flex;
+                align-items: center; /* テキストとアイコンを垂直方向に中央揃え */
+                z-index: 10;
+            }
+ 
+                .wallet-container img {
+                    width: 24px;
+                    height: 24px;
+                    margin-right: 8px;
+                    vertical-align: middle; /* アイコンをテキストと中央揃え */
+                }
 
         .container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 50px;
             padding: 40px;
             background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             width: 80%;
             max-width: 1000px;
-            margin-top: 80px;
+            margin-top: 140px;
         }
 
         .upgrade-item {
@@ -229,7 +232,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="<?= htmlspecialchars($backUrl) ?>" class="back-button">← 戻る</a>
     <div class="wallet-container">
     <img src="image/coin_kinoko.png" alt="Coin Icon"><!-- アイコンを所持金の横に表示 -->
-        所持金: <?php echo htmlspecialchars($_SESSION['total_money']); ?>c
+    <span id="money-display"><?php echo htmlspecialchars($_SESSION['total_money']); ?>c</span>
+       
+       
     </div>
 
     <div class="container">

@@ -61,6 +61,13 @@ $hasAdRemoval = $item && $item['level'] > 0; // 「レベルが1以上の場合�
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>広告視聴</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: url('image/kusokora.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
         #ad-popup {
             position: fixed;
             top: 50%;
@@ -68,10 +75,12 @@ $hasAdRemoval = $item && $item['level'] > 0; // 「レベルが1以上の場合�
             transform: translate(-50%, -50%);
             width: 400px;
             padding: 20px;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.7); /* 半透明の背景色 */
             border: 2px solid black;
             text-align: center;
             z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px; /* 丸みを追加 */
         }
         #ad-popup p {
             margin-bottom: 20px;
@@ -81,6 +90,7 @@ $hasAdRemoval = $item && $item['level'] > 0; // 「レベルが1以上の場合�
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
+            border-radius: 5px; /* ボタンを丸みを帯びた形に */
         }
         .popup-button.yes {
             background-color: lightgreen;

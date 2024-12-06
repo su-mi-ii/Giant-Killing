@@ -195,7 +195,7 @@ if ($current_world === 'SD3E') {
     </style>
 </head>
 <body>
-<button id="t" onclick="window.location.href='top.php';" style="position: relative;
+<button id="t" onclick="window.location.href='<?= htmlspecialchars($backUrl) ?>'" style="position: relative;
     z-index: 10; left:30px;">
 ↼戻る
 </button>

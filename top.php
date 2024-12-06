@@ -136,10 +136,12 @@ if (isset($_SESSION['updated_tool_effect'])) {
             background-image: url('image/gensou.webp');
             background-size: cover; /* 全画面に拡大 */
             background-position: center;
+            overflow: hidden;
         }
  
         #nameko-container {
-            margin: 20px 0;
+            margin: 90px 0;
+            margin-left: 5px;
             position: relative;
         }
  
@@ -149,6 +151,7 @@ if (isset($_SESSION['updated_tool_effect'])) {
             margin: 5px;
             cursor: pointer;
             position: absolute;
+
         }
  
  
@@ -311,7 +314,7 @@ if (isset($_SESSION['updated_tool_effect'])) {
     </div>
  
     <div class="taiyou-image">
-    <img src="image/taiyou1" alt="灯"  width="100"; height="100";>
+    <!-- <img src="image/taiyou1" alt="灯"  width="100"; height="100";> -->
     </div>
  
     <div class="pointbox-image">
@@ -325,14 +328,14 @@ if (isset($_SESSION['updated_tool_effect'])) {
         <div class="log"></div>
     </div>
  
-    <div class="spring-image">
+    <!-- <div class="spring-image">
     <img src="image/spring1.webp" alt="灯" width="100" height="100">
     </div>
  
     <div class="takibi-image">
     <img src="image/takibi1.webp" alt="灯" width="100" height="100">
     </div>
- 
+  -->
     <div id="container">
         <div id="main-button"></div>
         <div id="popup2" class="popup" onclick="navigateTo('start.php')"></div>
@@ -448,8 +451,10 @@ if (isset($_SESSION['updated_tool_effect'])) {
             namekoElement.appendChild(imgElement);
             namekoElement.addEventListener('click', () => harvestNameko(index));
  
-            const xPosition = (index % totalColumns) * (containerWidth / (totalColumns + 2));
-            const yPosition = logHeight - (100 * Math.floor(index / totalColumns)) - offsetY;
+            const gap = 0.5; // 隙間のサイズ
+            const xPosition = (index % totalColumns) * (containerWidth / totalColumns) + gap * (index % totalColumns);
+            const yPosition = logHeight - (100 + gap) * Math.floor(index / totalColumns) - offsetY;
+
             namekoElement.style.left = `${xPosition}px`;
             namekoElement.style.bottom = `${yPosition}px`;
             namekoElement.style.position = 'absolute';

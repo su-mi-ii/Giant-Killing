@@ -1,3 +1,27 @@
+<?php
+require 'db-connect.php';
+session_start();
+
+// ログインユーザー情報取得
+$user_id = $_SESSION['user_id'];
+
+
+// 現在のワールドを取得
+$sql = "SELECT current_world FROM users WHERE user_id = :user_id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$current_world = $stmt->fetchColumn();
+
+// 現在のワールドに応じた戻る URL を設定
+$backUrl = 'top.php'; // デフォルトは top.php
+if ($current_world === 'SD3E') {
+    $backUrl = 'SD3E_top.php';
+} elseif ($current_world === 'disney') {
+    $backUrl = 'disney_top.php';
+}
+
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -11,10 +35,11 @@
             text-align: center;
             margin: 0;
             padding: 0;
+            overflow: hidden;
         }
 
         .settings-container {
-            margin: 50px auto;
+            margin: 170px auto;
             padding: 60px 40px;
             width: 90%;
             max-width: 800px;
@@ -27,45 +52,15 @@
         .back-button {
             position: absolute;
             top: 40px;
-            left: 30px;
-        }
-
-        .back-button a {
-            display: inline-block;
-            position: relative;
-            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            left: 60px;
+            background: linear-gradient(135deg, #8b5e34, #a6713d);
             color: #fff;
-            padding: 12px 25px;
-            border-radius: 30px;
+            padding: 10px 20px;
+            border-radius: 5px;
             font-size: 1rem;
             text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .back-button a::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 200%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: skewX(-30deg);
-            transition: all 0.5s ease;
-            z-index: 0;
-        }
-
-        .back-button a:hover::before {
-            left: 100%;
-        }
-
-        .back-button a:hover {
-            transform: scale(1.1) translateY(-5px);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
 
         h2 {
@@ -136,9 +131,7 @@
     </style>
 </head>
 <body>
-    <div class="back-button">
-        <a href="top.php">← 戻る</a>
-    </div>
+<a href="<?= htmlspecialchars($backUrl) ?>" class="back-button">← 戻る</a>
     <div class="settings-container">
         <h2>サウンド</h2>
 

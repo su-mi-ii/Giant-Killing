@@ -193,27 +193,27 @@ ob_end_flush();  // バッファリングを終了
         }
 
         .wallet-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #ffcf33;
-            padding: 10px 20px;
-            border-radius: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            display: flex;
-            align-items: center; /* テキストとアイコンを垂直方向に中央揃え */
-            z-index: 10;
-        }
-
-        .wallet-container img {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
-            vertical-align: middle; /* アイコンをテキストと中央揃え */
-        }
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background-color: #ffcf33; /* 背景色を黄色に設定 */
+                padding: 15px 25px;
+                border-radius: 25px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #333;
+                display: flex;
+                align-items: center; /* テキストとアイコンを垂直方向に中央揃え */
+                z-index: 10;
+            }
+ 
+                .wallet-container img {
+                    width: 24px;
+                    height: 24px;
+                    margin-right: 8px;
+                    vertical-align: middle; /* アイコンをテキストと中央揃え */
+                }
 
         .container {
             display: flex;
